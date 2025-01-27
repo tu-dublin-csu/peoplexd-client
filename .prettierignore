@@ -1,0 +1,13 @@
+# Files and directories to exclude from formatting with prettier
+
+coverage
+dist
+node_modules
+.git
+docs
+
+**/*.env
+**/*package-lock.json
+**/*package.json
+.gitignore
+.prettierignore

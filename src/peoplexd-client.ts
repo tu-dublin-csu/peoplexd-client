@@ -11,7 +11,7 @@ export enum HttpRequestMethod {
     PUT = 'put',
     DELETE = 'delete'
 }
-enum PeopleXdClientHeadersContentType {
+enum HeadersContentType {
     APPLICATION_JSON = 'application/json'
 }
 
@@ -32,12 +32,7 @@ export class PeopleXdClient {
      * @param {string} clientSecret - The client secret for OAuth authentication.
      * @param {boolean} [useCache=true] - Whether to use cached tokens.
      */
-    constructor(
-        url: string,
-        clientId: string,
-        clientSecret: string,
-        useCache = true
-    ) {
+    constructor(url: string, clientId: string, clientSecret: string, useCache = true) {
         this.url = url
         this.clientId = clientId
         this.clientSecret = clientSecret
@@ -51,10 +46,7 @@ export class PeopleXdClient {
      * @returns {Promise<Object>} The appointments data.
      */
     public async appointments(staffNumber: string): Promise<AxiosResponse> {
-        return await this.request(
-            HttpRequestMethod.GET,
-            `${APPOINTMENT_ENDPOINT}/${staffNumber}`
-        )
+        return await this.request(HttpRequestMethod.GET, `${APPOINTMENT_ENDPOINT}/${staffNumber}`)
     }
 
     /**
@@ -63,10 +55,7 @@ export class PeopleXdClient {
      * @returns {Promise<AxiosResponse>} The department data.
      */
     public async department(deptCode: string): Promise<AxiosResponse> {
-        return await this.request(
-            HttpRequestMethod.GET,
-            `${DEPARTMENT_ENDPOINT}/${deptCode}`
-        )
+        return await this.request(HttpRequestMethod.GET, `${DEPARTMENT_ENDPOINT}/${deptCode}`)
     }
 
     /**
@@ -75,10 +64,7 @@ export class PeopleXdClient {
      * @returns {Promise<AxiosResponse>} The position title data.
      */
     public async positionTitle(positionCode: string): Promise<AxiosResponse> {
-        return await this.request(
-            HttpRequestMethod.GET,
-            `${POSITION_ENDPOINT}/${positionCode}`
-        )
+        return await this.request(HttpRequestMethod.GET, `${POSITION_ENDPOINT}/${positionCode}`)
     }
 
     /**
@@ -89,16 +75,12 @@ export class PeopleXdClient {
      * @returns {Promise<Object>} The response data.
      * @throws Will throw an error if the request fails.
      */
-    private async request(
-        method: HttpRequestMethod,
-        endpoint: string,
-        body = null
-    ): Promise<AxiosResponse> {
+    private async request(method: HttpRequestMethod, endpoint: string, body = null): Promise<AxiosResponse> {
         const uri = `${this.url}${endpoint}`
         const token = await this.tokenManager.useOrFetchToken()
         const headers = {
             Authorization: `Bearer ${token}`,
-            'Content-Type': PeopleXdClientHeadersContentType.APPLICATION_JSON
+            'Content-Type': HeadersContentType.APPLICATION_JSON
         }
 
         try {
@@ -108,9 +90,7 @@ export class PeopleXdClient {
                 headers,
                 data: body
             })
-            console.debug(
-                `${method.toUpperCase()} ${uri} response: ${JSON.stringify(response.data, null, 2)}`
-            )
+            console.debug(`${method.toUpperCase()} ${uri} response: ${JSON.stringify(response.data, null, 2)}`)
             return response
         } catch (error: unknown) {
             console.error(

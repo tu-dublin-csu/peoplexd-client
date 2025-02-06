@@ -39,15 +39,11 @@ export class TokenManager {
      */
     private readCachedToken(): void {
         try {
-            const cachedToken: PeopleXdToken = JSON.parse(
-                fs.readFileSync(`${TMP_DIR}/${CACHE_TOKEN_FILE}`, UTF8)
-            )
+            const cachedToken: PeopleXdToken = JSON.parse(fs.readFileSync(`${TMP_DIR}/${CACHE_TOKEN_FILE}`, UTF8))
             this.pxdToken = cachedToken
         } catch (error: unknown) {
             if (error instanceof Error) {
-                console.log(
-                    `No cached token found or error reading cache: ${error.message}`
-                )
+                console.log(`No cached token found or error reading cache: ${error.message}`)
             } else {
                 console.log(`No cached token found or error reading cache`)
             }
@@ -63,10 +59,7 @@ export class TokenManager {
             if (!fs.existsSync(TMP_DIR)) {
                 fs.mkdirSync(TMP_DIR, { recursive: true })
             }
-            fs.writeFileSync(
-                path.join(TMP_DIR, CACHE_TOKEN_FILE),
-                JSON.stringify(this.pxdToken)
-            )
+            fs.writeFileSync(path.join(TMP_DIR, CACHE_TOKEN_FILE), JSON.stringify(this.pxdToken))
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error('Error caching token:', error.message)
@@ -122,10 +115,7 @@ export class TokenManager {
      * @returns {string} The access token.
      */
     public async useOrFetchToken(): Promise<string> {
-        if (
-            !this.pxdToken ||
-            new Date() >= new Date(this.pxdToken.expires_at)
-        ) {
+        if (!this.pxdToken || new Date() >= new Date(this.pxdToken.expires_at)) {
             await this.fetchToken()
         }
         return this.pxdToken!.access_token

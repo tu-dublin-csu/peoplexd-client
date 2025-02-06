@@ -26,8 +26,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tu-dublin-csu/peoplexd-client-v2.git"
+    "url": "git+https://github.com/tu-dublin-csu/peoplexd-client.git"
   },
+  "bugs": {
+        "url": "https://github.com/tu-dublin-csu/peoplexd-client/issues"
+    },
+    "homepage": "https://github.com/tu-dublin-csu/peoplexd-client#readme",
   "keywords": [
     "peoplexd",
     "client"

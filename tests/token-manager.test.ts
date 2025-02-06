@@ -41,9 +41,7 @@ describe('TokenManager', () => {
             expires_at: nextDay
         }
 
-        jest.spyOn(fs, 'readFileSync').mockImplementation(() =>
-            JSON.stringify(cachedToken)
-        )
+        jest.spyOn(fs, 'readFileSync').mockImplementation(() => JSON.stringify(cachedToken))
 
         tokenManager = new TokenManager(url, clientId, clientSecret)
 
@@ -64,9 +62,7 @@ describe('TokenManager', () => {
             expires_at: previousDay
         }
 
-        jest.spyOn(fs, 'readFileSync').mockImplementation(() =>
-            JSON.stringify(cachedToken)
-        )
+        jest.spyOn(fs, 'readFileSync').mockImplementation(() => JSON.stringify(cachedToken))
 
         tokenManager = new TokenManager(url, clientId, clientSecret)
 
@@ -82,12 +78,9 @@ describe('TokenManager', () => {
 
     test('should handle an error when fetching the token from the server', async () => {
         tokenManager = new TokenManager(url, clientId, clientSecret)
-
         ;(axios.post as jest.Mock).mockRejectedValue(new Error('Network Error'))
 
-        await expect(tokenManager.useOrFetchToken()).rejects.toThrow(
-            new Error('Network Error')
-        )
+        await expect(tokenManager.useOrFetchToken()).rejects.toThrow(new Error('Network Error'))
     })
 
     test('should log error when error occurs caching token', async () => {
@@ -107,9 +100,6 @@ describe('TokenManager', () => {
 
         expect(accessToken).toEqual('new-token-3')
         expect(console.error).toHaveBeenCalledTimes(1)
-        expect(console.error).toHaveBeenCalledWith(
-            'Error caching token:',
-            'Error writing file'
-        )
+        expect(console.error).toHaveBeenCalledWith('Error caching token:', 'Error writing file')
     })
 })

@@ -1,16 +1,16 @@
 {
     "source": {
-      "include": ["dist"],
-      "includePattern": ".+\\.js(doc|x)?$",
-      "excludePattern": "(^|\\/|\\\\)_"
+        "include": ["dist"],
+        "includePattern": ".+\\.js(doc|x)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
     },
     "opts": {
-      "destination": "./docs",
-      "recurse": true
+        "destination": "./docs",
+        "recurse": true
     },
-    "plugins": ["plugins/markdown"],
+    "plugins": [],
     "templates": {
-      "cleverLinks": false,
-      "monospaceLinks": false
+        "cleverLinks": false,
+        "monospaceLinks": false
     }
-  }
+}

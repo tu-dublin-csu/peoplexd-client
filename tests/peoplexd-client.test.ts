@@ -31,10 +31,7 @@ describe('PeopleXdClient', () => {
         const mockData = [{ id: 11, name: 'Meet John Doe' }]
 
         const token = 'access_token'
-        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(
-            token
-        )
-
+        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(token)
         ;(axios as unknown as jest.Mock).mockResolvedValue({ data: mockData })
 
         const data = await client.appointments('11')
@@ -48,10 +45,7 @@ describe('PeopleXdClient', () => {
         const mockData = [{ id: 'RE02', name: 'Computer Science' }]
 
         const token = 'access_token'
-        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(
-            token
-        )
-
+        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(token)
         ;(axios as unknown as jest.Mock).mockResolvedValue({ data: mockData })
 
         const data = await client.department('RE02')
@@ -63,25 +57,17 @@ describe('PeopleXdClient', () => {
 
     it('should handle fetch appointments where an error occurs', async () => {
         const token = 'access_token'
-        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(
-            token
-        )
-
-        ;(axios as unknown as jest.Mock).mockRejectedValue(
-            new Error('Network Error')
-        )
+        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(token)
+        ;(axios as unknown as jest.Mock).mockRejectedValue(new Error('Network Error'))
 
         await expect(client.appointments('11')).rejects.toThrow('Network Error')
     })
 
     it('should fetch position title data correctly', async () => {
-        const mockData = {items: [{ type: 'POSTTL', code: 'CSUL', "description": "Common Services Unit Lead" }]}
+        const mockData = { items: [{ type: 'POSTTL', code: 'CSUL', description: 'Common Services Unit Lead' }] }
 
         const token = 'access_token'
-        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(
-            token
-        )
-
+        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(token)
         ;(axios as unknown as jest.Mock).mockResolvedValue({ data: mockData })
 
         const data = await client.positionTitle('CSUL')
@@ -93,31 +79,17 @@ describe('PeopleXdClient', () => {
 
     it('should handle fetch department where an error occurs', async () => {
         const token = 'access_token'
-        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(
-            token
-        )
+        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(token)
+        ;(axios as unknown as jest.Mock).mockRejectedValue(new Error('Network Error!'))
 
-        ;(axios as unknown as jest.Mock).mockRejectedValue(
-            new Error('Network Error!')
-        )
-
-        await expect(client.department('ROOM_11')).rejects.toThrow(
-            'Network Error!'
-        )
+        await expect(client.department('ROOM_11')).rejects.toThrow('Network Error!')
     })
 
     it('should handle fetch position title where an error occurs', async () => {
         const token = 'access_token'
-        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(
-            token
-        )
+        jest.spyOn(TokenManager.prototype, 'useOrFetchToken').mockResolvedValue(token)
+        ;(axios as unknown as jest.Mock).mockRejectedValue(new Error('Network Error!'))
 
-        ;(axios as unknown as jest.Mock).mockRejectedValue(
-            new Error('Network Error!')
-        )
-
-        await expect(client.positionTitle('CSUS')).rejects.toThrow(
-            'Network Error!'
-        )
+        await expect(client.positionTitle('CSUS')).rejects.toThrow('Network Error!')
     })
 })

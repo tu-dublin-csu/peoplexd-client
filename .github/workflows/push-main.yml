@@ -1,0 +1,39 @@
+name: 'Test, Build and Deploy when push to main'
+on:
+    push:
+      branches:
+        - 'main'
+    workflow_dispatch:
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        name: Test the application
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Install Dependancies
+              run: npm install
+            - name: Test application
+              run: npm test
+            - name: Lint Code
+              run: npm run lint
+    build:
+        needs: test
+        runs-on: ubuntu-latest
+        name: Build and Deploy project
+        env:
+            NODE_AUTH_TOKEN: ${{ secrets.PEOPLEXD_NPM_TOKEN }}
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v4
+            -   name: Set up node
+                uses: actions/setup-node@v4
+                with:
+                    node-version: "22"
+                    registry-url: https://registry.npmjs.org
+            -   name: Install Dependancies
+                run: npm install
+            -   name: Build Package
+                run: npm run build
+            -   name: Publish Package
+                run: npm publish

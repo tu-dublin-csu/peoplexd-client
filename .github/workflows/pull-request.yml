@@ -1,0 +1,16 @@
+name: Run Tests when a Pull Request is made
+on:
+    pull_request:
+        types: [opened, synchronize]
+jobs:
+    specific_review_requested:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Install Dependancies
+              run: npm install
+            - name: Test application
+              run: npm test
+            - name: Lint Code
+              run: npm run lint

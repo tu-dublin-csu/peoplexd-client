@@ -1,4 +1,4 @@
-name: 'Test and Build when push to staging'
+name: 'Test, Lint and Build when push to staging'
 on:
     push:
       branches:

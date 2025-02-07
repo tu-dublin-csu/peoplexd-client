@@ -1,6 +1,11 @@
-name: 'Test and lint code when pushed to Github'
+name: 'Test and Lint code when Pushed to Github or when a Pull Request is made'
 on:
     push:
+        branches-ignore: 
+          - main
+          - staging
+    pull_request:
+        types: [opened, synchronize]
 jobs:
     test:
         runs-on: ubuntu-latest

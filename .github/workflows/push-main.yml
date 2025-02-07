@@ -1,4 +1,4 @@
-name: 'Test, Build and Deploy when push to main'
+name: 'Test, Lint, Build and Deploy when push to main'
 on:
     push:
       branches:

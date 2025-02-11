@@ -23,7 +23,7 @@ export class PeopleXdClient {
     private clientId: string
     private clientSecret: string
     private useCache: boolean
-    private tokenManager: TokenManager
+    static tokenManager: TokenManager
 
     /**
      * Creates an instance of PeopleXdClient.
@@ -32,13 +32,26 @@ export class PeopleXdClient {
      * @param {string} clientSecret - The client secret for OAuth authentication.
      * @param {boolean} [useCache=true] - Whether to use cached tokens.
      */
-    constructor(url: string, clientId: string, clientSecret: string, useCache = true) {
+    private constructor(url: string, clientId: string, clientSecret: string, useCache = true) {
         this.url = url
         this.clientId = clientId
         this.clientSecret = clientSecret
         this.useCache = useCache
-        this.tokenManager = new TokenManager(url, clientId, clientSecret)
     }
+
+     /**
+     * Factory method to create instance
+     * @param {string} url 
+     * @param {string} clientId 
+     * @param {string} clientSecret 
+     * @param {boolean} [useCache=true] - Whether to use cached tokens.
+     * @returns {PeopleXdClient}
+     */
+    static async createInstance(url: string, clientId: string, clientSecret: string, useCache = true): Promise<PeopleXdClient> {
+        const instance = new PeopleXdClient(url, clientId, clientSecret, useCache);
+        this.tokenManager = await TokenManager.createInstance(url, clientId, clientSecret);
+        return instance;
+      }
 
     /**
      * Fetches the appointments for a given staff number.
@@ -77,7 +90,7 @@ export class PeopleXdClient {
      */
     private async request(method: HttpRequestMethod, endpoint: string, body = null): Promise<AxiosResponse> {
         const uri = `${this.url}${endpoint}`
-        const token = await this.tokenManager.useOrFetchToken()
+        const token = await PeopleXdClient.tokenManager.useOrFetchToken()
         const headers = {
             Authorization: `Bearer ${token}`,
             'Content-Type': HeadersContentType.APPLICATION_JSON

@@ -18,14 +18,15 @@ describe('TokenManager', () => {
         jest.restoreAllMocks()
     })
 
-    test('should fetch the token from the server when none is available on file', async () => {
-        tokenManager = new TokenManager(url, clientId, clientSecret)
-
+    test('should fetch the token from the server when none is available on creation, then read from file there after', async () => {
         const response = {
             data: { access_token: 'new-token', expires_in: 3600 }
         }
         ;(axios.post as jest.Mock).mockResolvedValue(response)
 
+        tokenManager = await TokenManager.createInstance(url, clientId, clientSecret)
+
+        // this will read from cache
         const accessToken = await tokenManager.useOrFetchToken()
 
         expect(accessToken).toEqual('new-token')
@@ -43,10 +44,11 @@ describe('TokenManager', () => {
 
         jest.spyOn(fs, 'readFileSync').mockImplementation(() => JSON.stringify(cachedToken))
 
-        tokenManager = new TokenManager(url, clientId, clientSecret)
+        tokenManager = await TokenManager.createInstance(url, clientId, clientSecret)
 
         const accessToken = await tokenManager.useOrFetchToken()
-
+        // never try an fetch a token
+        expect((axios.post as jest.Mock)).toHaveBeenCalledTimes(0)
         expect(accessToken).toEqual('cached-token')
     })
 
@@ -64,7 +66,7 @@ describe('TokenManager', () => {
 
         jest.spyOn(fs, 'readFileSync').mockImplementation(() => JSON.stringify(cachedToken))
 
-        tokenManager = new TokenManager(url, clientId, clientSecret)
+        tokenManager = await TokenManager.createInstance(url, clientId, clientSecret)
 
         const response = {
             data: { access_token: 'new-token-2', expires_in: nextDay }
@@ -77,15 +79,11 @@ describe('TokenManager', () => {
     })
 
     test('should handle an error when fetching the token from the server', async () => {
-        tokenManager = new TokenManager(url, clientId, clientSecret)
-        ;(axios.post as jest.Mock).mockRejectedValue(new Error('Network Error'))
-
-        await expect(tokenManager.useOrFetchToken()).rejects.toThrow(new Error('Network Error'))
+        (axios.post as jest.Mock).mockRejectedValue(new Error('Network Error'))
+        await expect(TokenManager.createInstance(url, clientId, clientSecret)).rejects.toThrow(new Error('Network Error'))
     })
 
     test('should log error when error occurs caching token', async () => {
-        tokenManager = new TokenManager(url, clientId, clientSecret)
-
         const response = {
             data: { access_token: 'new-token-3', expires_in: 3600 }
         }
@@ -96,10 +94,12 @@ describe('TokenManager', () => {
         })
         jest.spyOn(console, 'error')
 
+        tokenManager = await TokenManager.createInstance(url, clientId, clientSecret)
+
         const accessToken = await tokenManager.useOrFetchToken()
 
         expect(accessToken).toEqual('new-token-3')
-        expect(console.error).toHaveBeenCalledTimes(1)
+        expect(console.error).toHaveBeenCalledTimes(2)
         expect(console.error).toHaveBeenCalledWith('Error caching token:', 'Error writing file')
     })
 })

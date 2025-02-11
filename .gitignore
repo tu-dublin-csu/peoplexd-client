@@ -44,6 +44,7 @@ tmp
 
 # Script used locally for testing the built package
 src/_main-test-dist-folder.js
+dummy_project
 
 # JSDocs
 docs

@@ -26,12 +26,24 @@ export class TokenManager {
      * @param {string} clientId - The client ID for OAuth authentication.
      * @param {string} clientSecret - The client secret for OAuth authentication.
      */
-    constructor(url: string, clientId: string, clientSecret: string) {
+    private constructor(url: string, clientId: string, clientSecret: string) {
         this.url = url
         this.clientId = clientId
         this.clientSecret = clientSecret
         this.pxdToken = null
-        this.readCachedToken()
+    }
+
+    /**
+     * Factory method to create instance
+     * @param {string} url 
+     * @param {string} clientId 
+     * @param {string} clientSecret 
+     * @returns {TokenManager}
+     */
+    public static async createInstance(url: string, clientId: string, clientSecret: string): Promise<TokenManager> {
+        const tokenManager = new TokenManager(url, clientId, clientSecret)
+        await tokenManager.useOrFetchToken()
+        return tokenManager
     }
 
     /**
@@ -115,6 +127,8 @@ export class TokenManager {
      * @returns {string} The access token.
      */
     public async useOrFetchToken(): Promise<string> {
+        this.readCachedToken()
+
         if (!this.pxdToken || new Date() >= new Date(this.pxdToken.expires_at)) {
             await this.fetchToken()
         }

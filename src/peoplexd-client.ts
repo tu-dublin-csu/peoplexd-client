@@ -39,19 +39,19 @@ export class PeopleXdClient {
         this.useCache = useCache
     }
 
-     /**
+    /**
      * Factory method to create instance
-     * @param {string} url 
-     * @param {string} clientId 
-     * @param {string} clientSecret 
+     * @param {string} url
+     * @param {string} clientId
+     * @param {string} clientSecret
      * @param {boolean} [useCache=true] - Whether to use cached tokens.
      * @returns {PeopleXdClient}
      */
-    static async createInstance(url: string, clientId: string, clientSecret: string, useCache = true): Promise<PeopleXdClient> {
-        const instance = new PeopleXdClient(url, clientId, clientSecret, useCache);
-        this.tokenManager = await TokenManager.createInstance(url, clientId, clientSecret);
-        return instance;
-      }
+    static async new(url: string, clientId: string, clientSecret: string, useCache = true): Promise<PeopleXdClient> {
+        const instance = new PeopleXdClient(url, clientId, clientSecret, useCache)
+        this.tokenManager = await TokenManager.new(url, clientId, clientSecret)
+        return instance
+    }
 
     /**
      * Fetches the appointments for a given staff number.

@@ -35,12 +35,12 @@ export class TokenManager {
 
     /**
      * Factory method to create instance
-     * @param {string} url 
-     * @param {string} clientId 
-     * @param {string} clientSecret 
+     * @param {string} url
+     * @param {string} clientId
+     * @param {string} clientSecret
      * @returns {TokenManager}
      */
-    public static async createInstance(url: string, clientId: string, clientSecret: string): Promise<TokenManager> {
+    public static async new(url: string, clientId: string, clientSecret: string): Promise<TokenManager> {
         const tokenManager = new TokenManager(url, clientId, clientSecret)
         await tokenManager.useOrFetchToken()
         return tokenManager

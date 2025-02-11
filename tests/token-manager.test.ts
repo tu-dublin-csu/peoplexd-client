@@ -24,7 +24,7 @@ describe('TokenManager', () => {
         }
         ;(axios.post as jest.Mock).mockResolvedValue(response)
 
-        tokenManager = await TokenManager.createInstance(url, clientId, clientSecret)
+        tokenManager = await TokenManager.new(url, clientId, clientSecret)
 
         // this will read from cache
         const accessToken = await tokenManager.useOrFetchToken()
@@ -44,11 +44,11 @@ describe('TokenManager', () => {
 
         jest.spyOn(fs, 'readFileSync').mockImplementation(() => JSON.stringify(cachedToken))
 
-        tokenManager = await TokenManager.createInstance(url, clientId, clientSecret)
+        tokenManager = await TokenManager.new(url, clientId, clientSecret)
 
         const accessToken = await tokenManager.useOrFetchToken()
         // never try an fetch a token
-        expect((axios.post as jest.Mock)).toHaveBeenCalledTimes(0)
+        expect(axios.post as jest.Mock).toHaveBeenCalledTimes(0)
         expect(accessToken).toEqual('cached-token')
     })
 
@@ -66,7 +66,7 @@ describe('TokenManager', () => {
 
         jest.spyOn(fs, 'readFileSync').mockImplementation(() => JSON.stringify(cachedToken))
 
-        tokenManager = await TokenManager.createInstance(url, clientId, clientSecret)
+        tokenManager = await TokenManager.new(url, clientId, clientSecret)
 
         const response = {
             data: { access_token: 'new-token-2', expires_in: nextDay }
@@ -79,8 +79,8 @@ describe('TokenManager', () => {
     })
 
     test('should handle an error when fetching the token from the server', async () => {
-        (axios.post as jest.Mock).mockRejectedValue(new Error('Network Error'))
-        await expect(TokenManager.createInstance(url, clientId, clientSecret)).rejects.toThrow(new Error('Network Error'))
+        ;(axios.post as jest.Mock).mockRejectedValue(new Error('Network Error'))
+        await expect(TokenManager.new(url, clientId, clientSecret)).rejects.toThrow(new Error('Network Error'))
     })
 
     test('should log error when error occurs caching token', async () => {
@@ -94,7 +94,7 @@ describe('TokenManager', () => {
         })
         jest.spyOn(console, 'error')
 
-        tokenManager = await TokenManager.createInstance(url, clientId, clientSecret)
+        tokenManager = await TokenManager.new(url, clientId, clientSecret)
 
         const accessToken = await tokenManager.useOrFetchToken()
 

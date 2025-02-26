@@ -12,16 +12,16 @@ interface PeopleXdToken {
 }
 
 /**
- * TokenManager class to handle OAuth token management.
+ * TokenManagerService class to handle OAuth token management.
  */
-export class TokenManager {
+export class TokenManagerService {
     private url: string
     private clientId: string
     private clientSecret: string
     private pxdToken: null | PeopleXdToken
 
     /**
-     * Creates an instance of TokenManager.
+     * Creates an instance of TokenManagerService.
      * @param {string} url - The base URL for the OAuth token endpoint.
      * @param {string} clientId - The client ID for OAuth authentication.
      * @param {string} clientSecret - The client secret for OAuth authentication.
@@ -38,10 +38,10 @@ export class TokenManager {
      * @param {string} url
      * @param {string} clientId
      * @param {string} clientSecret
-     * @returns {TokenManager}
+     * @returns {TokenManagerService}
      */
-    public static async new(url: string, clientId: string, clientSecret: string): Promise<TokenManager> {
-        const tokenManager = new TokenManager(url, clientId, clientSecret)
+    public static async new(url: string, clientId: string, clientSecret: string): Promise<TokenManagerService> {
+        const tokenManager = new TokenManagerService(url, clientId, clientSecret)
         await tokenManager.useOrFetchToken()
         return tokenManager
     }

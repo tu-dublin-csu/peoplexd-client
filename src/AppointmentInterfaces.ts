@@ -1,4 +1,4 @@
-interface Hierarchy {
+export interface Hierarchy {
     structureCode: string;
     company: string;
     managementUnit: string;

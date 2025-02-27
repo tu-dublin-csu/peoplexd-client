@@ -101,7 +101,16 @@ This client handles OAuth authentication automatically. It will:
 
 ### Development Container
 
-This project includes a devcontainer configuration for Visual Studio Code, which provides a consistent development environment with all necessary dependencies.
+This project includes a devcontainer configuration for Visual Studio Code, which provides a consistent development environment with all necessary dependencies. In includes a sample `devcontainer.env.EXAMPLE` file which you will need to rename `devcontainer.env` and populate with required values for your PeopleXD tenancy.
+
+```
+PEOPLEXD_URL=https://api.corehr.com/ws/<your_tenant_id>/corehr/
+PRODUCTION_PXD_SECRET=<your_secret>
+PRODUCTION_PXD_ID=<your_id>
+TEST_STAFF_ID=12345 # used in dummy_proj/main.js
+```
+
+**Note:** the Staging URL will be diferent - see the PeopleXD documentation for details.
 
 ### Testing
 

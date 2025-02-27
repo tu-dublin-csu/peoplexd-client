@@ -146,5 +146,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 © 2025 tu-dublin-csu
-
-Similar code found with 1 license type

@@ -31,7 +31,7 @@ describe('PeopleXdClient', () => {
     client = await PeopleXdClient.new(url, clientId, clientSecret);
     
     // Cast httpClient to mocked version to access mock methods
-    httpClientMock = (client as any).httpClient;
+    httpClientMock = (client as unknown as { httpClient: jest.Mocked<HttpClient> }).httpClient;
   });
 
   afterEach(() => {
@@ -84,7 +84,7 @@ describe('PeopleXdClient', () => {
       const fullDepartment = 'Computer Science Department';
       
       // Get departmentService mock and set up return value
-      const departmentServiceMock = (client as any).departmentService;
+      const departmentServiceMock = (client as unknown as { departmentService: jest.Mocked<DepartmentService> }).departmentService;
       departmentServiceMock.getFullDepartment.mockResolvedValue(fullDepartment);
 
       const result = await client.getFullDepartment(deptCode);
@@ -100,7 +100,7 @@ describe('PeopleXdClient', () => {
       const fullJobTitle = 'Senior Software Engineer';
       
       // Get positionService mock and set up return value
-      const positionServiceMock = (client as any).positionService;
+      const positionServiceMock = (client as unknown as { positionService: jest.Mocked<PositionService> }).positionService;
       positionServiceMock.getFullJobTitle.mockResolvedValue(fullJobTitle);
 
       const result = await client.getFullJobTitle(positionCode);
@@ -127,7 +127,7 @@ describe('PeopleXdClient', () => {
       ];
       
       // Get appointmentService mock and set up return value
-      const appointmentServiceMock = (client as any).appointmentService;
+      const appointmentServiceMock = (client as unknown as { appointmentService: jest.Mocked<AppointmentService> }).appointmentService;
       appointmentServiceMock.cleanAppointments.mockResolvedValue(processedAppointments);
 
       const result = await client.cleanAppointments(staffNumber);

@@ -48,3 +48,7 @@ dummy_project
 
 # JSDocs
 docs
+
+# Mac files
+.DS_Store
+.devcontainer/devcontainer.env

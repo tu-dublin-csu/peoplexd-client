@@ -18,29 +18,46 @@ npm install peoplexd-client
 ### Initialize the Client
 
 ```typescript
-import { PeopleXdClient } from 'peoplexd-client';
+import { PeopleXdClient } from 'peoplexd-client'
 
 const client = await PeopleXdClient.new(
-  'https://api.corehr.com/ws/<tenant_id>/corehr/', // include your tenant id
-  'your-client-id', // provided by your PeopleXD admin
-  'your-client-secret' // provided by you PeopleXD admin
-);
+    'https://api.corehr.com/ws/<tenant_id>/corehr/', // include your tenant id
+    'your-client-id', // provided by your PeopleXD admin
+    'your-client-secret' // provided by you PeopleXD admin
+)
+```
+
+## Configuration Options
+
+When initializing the PeopleXdClient, you can provide configuration options:
+
+```typescript
+interface PeopleXdClientOptions {
+    titleCodeSubstitutions?: Record<string, string>
+}
+
+// Example usage:
+const client = await PeopleXdClient.new('https://api.peoplexd.example.com/', 'your-client-id', 'your-client-secret', {
+    titleCodeSubstitutions: {
+        HPAL: 'AL' // Substitute "Hourly Paid Assistant Lecturer" with "Assistant Lecturer"
+    }
+})
 ```
 
 ### Making API Requests
 
 ```typescript
 // Make a direct API request
-const response = await client.request('GET', 'v1/endpoint');
+const response = await client.request('GET', 'v1/endpoint')
 
 // Get staff appointments (processed and cleaned)
-const appointments = await client.cleanAppointments('12345');
+const appointments = await client.cleanAppointments('12345')
 
 // Get department information
-const departmentName = await client.getFullDepartment('IT_DEPT');
+const departmentName = await client.getFullDepartment('IT_DEPT')
 
 // Get position/job title information
-const jobTitle = await client.getFullJobTitle('SOFTWARE_DEV');
+const jobTitle = await client.getFullJobTitle('SOFTWARE_DEV')
 ```
 
 ## API Documentation
@@ -61,14 +78,14 @@ The main client class that provides access to the PeopleXD API.
 
 ```typescript
 interface ProcessedAppointment {
-  appointmentId: string;
-  primaryFlag: boolean;
-  jobTitle: string;
-  fullJobTitle: string;
-  department: string;
-  fullDepartment: string;
-  startDate: string;
-  endDate: string;
+    appointmentId: string
+    primaryFlag: boolean
+    jobTitle: string
+    fullJobTitle: string
+    department: string
+    fullDepartment: string
+    startDate: string
+    endDate: string
 }
 ```
 
@@ -85,19 +102,21 @@ This client handles OAuth authentication automatically. It will:
 ### Setup
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/tu-dublin-csu/peoplexd-client.git
-   ```
+
+    ```bash
+    git clone https://github.com/tu-dublin-csu/peoplexd-client.git
+    ```
 
 2. Install dependencies:
-   ```bash 
-   npm install
-   ```
+
+    ```bash
+    npm install
+    ```
 
 3. Build the project:
-   ```bash
-   npm run build
-   ```
+    ```bash
+    npm run build
+    ```
 
 ### Development Container
 
@@ -112,15 +131,21 @@ TEST_STAFF_ID=12345 # used in dummy_proj/main.js
 
 **Note:** the Staging URL will be diferent - see the PeopleXD documentation for details.
 
+A simple script allows you to test against your PeopleXD instance
+
+```
+node ./dummy_proj/main.js
+```
+
 ### Testing
 
 Run tests with:
 
 ```bash
-npm test
+npm run test
 ```
 
-The project uses Jest for testing with TypeScript support and maintains high test coverage.
+The project uses Jest for testing with TypeScript support.
 
 ### Linting and Formatting
 

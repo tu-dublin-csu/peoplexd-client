@@ -10,7 +10,7 @@
         "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers/features/node:1": {
             "version": "22"
-          }
+        }
     },
     "customizations": {
         "vscode": {
@@ -26,7 +26,7 @@
             }
         }
     },
-    "runArgs": ["--env-file",".devcontainer/devcontainer.env"],
+    "runArgs": ["--env-file", ".devcontainer/devcontainer.env"],
 
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     // "forwardPorts": [],

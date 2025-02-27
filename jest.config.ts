@@ -28,10 +28,7 @@ const config: Config = {
     coverageDirectory: 'coverage',
 
     // An array of regexp pattern strings used to skip coverage collection
-    coveragePathIgnorePatterns: [
-      "/node_modules/",
-      "/tests/fixtures/"
-    ],
+    coveragePathIgnorePatterns: ['/node_modules/', '/tests/fixtures/'],
 
     // Indicates which provider should be used to instrument code for coverage
     coverageProvider: 'v8',
@@ -142,7 +139,7 @@ const config: Config = {
     // snapshotSerializers: [],
 
     // The test environment that will be used for testing
-    testEnvironment: 'node',
+    testEnvironment: 'node'
 
     // Options that will be passed to the testEnvironment
     // testEnvironmentOptions: {},

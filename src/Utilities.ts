@@ -1,5 +1,5 @@
-import { decode } from 'html-entities';
+import { decode } from 'html-entities'
 
 export function decodeHtml(text: string): string {
-    return decode(text);
+    return decode(text)
 }

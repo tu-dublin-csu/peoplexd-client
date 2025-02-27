@@ -7,8 +7,26 @@
 
     // Features to add to the dev container. More info: https://containers.dev/features.
     "features": {
-        "ghcr.io/devcontainers/features/github-cli:1": {}
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "22"
+        }
     },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "GitHub.vscode-pull-request-github",
+                "GitHub.vscode-github-actions"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "terminal.integrated.profiles.linux": { "zsh": { "path": "/usr/bin/zsh" } }
+            }
+        }
+    },
+    "runArgs": ["--env-file", ".devcontainer/devcontainer.env"],
 
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     // "forwardPorts": [],
@@ -16,8 +34,10 @@
     // Use 'postCreateCommand' to run commands after the container is created.
     "postCreateCommand": "npm install",
 
-    "mounts": ["source=${env:HOME}${env:USERPROFILE}/.npmrc,target=/home/node/.npmrc,type=bind"]
-
+    "mounts": [
+        "source=${env:HOME}${env:USERPROFILE}/.npmrc,target=/home/node/.npmrc,type=bind",
+        "source=${env:HOME}${env:USERPROFILE}/.vscode-zsh-hists/peoplexd_client.zsh_history,target=/home/node/.zsh_history,type=bind"
+    ]
     // Configure tool-specific properties.
     // "customizations": {},
 

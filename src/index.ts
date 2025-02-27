@@ -1,3 +1,3 @@
-import { PeopleXdClient } from './peoplexd-client'
+import { PeopleXdClient } from './PeopleXdClient'
 
 export { PeopleXdClient }

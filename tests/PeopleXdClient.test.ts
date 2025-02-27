@@ -84,7 +84,7 @@ describe('PeopleXdClient', () => {
       const fullDepartment = 'Computer Science Department';
       
       // Get departmentService mock and set up return value
-      const departmentServiceMock = (client as unknown).departmentService;
+      const departmentServiceMock = (client as any).departmentService;
       departmentServiceMock.getFullDepartment.mockResolvedValue(fullDepartment);
 
       const result = await client.getFullDepartment(deptCode);

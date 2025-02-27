@@ -19,13 +19,33 @@ describe('HttpClient', () => {
   it('should make a GET request with correct parameters', async () => {
     const endpoint = 'users';
     const mockResponse: AxiosResponse = {
-      data: { id: 1, name: 'John Doe' },
-      status: 200,
-      statusText: 'OK',
-      headers: new AxiosHeaders(),
-      config: { headers: new AxiosHeaders() }
-    };
-
+    data: { 
+    "items": 
+      [
+        {
+          "type": "POSTTL",
+          "code": "LIBAAL",
+          "description": "Liberal Arts Academic Lead",
+          "active": "Y"
+        }
+      ],
+    "limit": 100,
+    "offsetby": 0,
+    "count": 1,
+    "hasMore": false,
+    "links": 
+      [
+        {
+          "rel": "first",
+          "href": "https://api.corehr.com/ws/tudp/corehr/v1/reference/type/POSTTL/LIBAAL"
+        }
+      ]
+    },
+    status: 200,
+    statusText: 'OK',
+    headers: new AxiosHeaders(),
+    config: { headers: new AxiosHeaders() }
+    }
     // Mock axios response
     mockedAxios.mockResolvedValueOnce(mockResponse);
 

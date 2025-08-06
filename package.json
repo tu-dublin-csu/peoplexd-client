@@ -10,7 +10,7 @@
     "dist"
   ],
   "scripts": {
-    "start": "node src/_main-test-dist-folder.js",
+    "start": "node dummy_proj/main.js",
     "build": "tsup",
     "test": "jest",
     "format": "prettier --write .",

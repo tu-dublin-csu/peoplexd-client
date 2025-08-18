@@ -17,7 +17,7 @@ try {
 
     console.log(client.getOptions())
 
-    const staffIDFail = '455441';
+    const staffIDFail = '123456';
     const appointments = await client.cleanAppointments(staffIDFail)
 
     console.log(appointments)

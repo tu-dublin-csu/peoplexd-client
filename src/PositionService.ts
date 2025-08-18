@@ -10,7 +10,9 @@ export class PositionService {
     }
 
     public async getPositionTitle(positionCode: string): Promise<AxiosResponse> {
-        return await this.client.request('GET', `v1/reference/type/POSTTL/${positionCode}`)
+        // positionCode can come from `v1/person/appointment/${staffNumber}` api. 
+        // It is encoded html there, so we must decode it here to make this api call safely.
+        return await this.client.request('GET', `v1/reference/type/POSTTL/${decodeHtml(positionCode)}`)
     }
 
     public async getFullJobTitle(positionCode: string): Promise<string> {

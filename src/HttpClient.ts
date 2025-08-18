@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
+import { log, LogType } from './Utilities'
 
 export class HttpClient {
     private url: string
@@ -23,11 +24,11 @@ export class HttpClient {
                 headers,
                 data: body
             })
-            console.debug(`${method.toUpperCase()} ${uri} response: ${JSON.stringify(response.data, null, 2)}`)
+            log(LogType.DEBUG, `${method.toUpperCase()} ${uri} response: ${JSON.stringify(response.data, null, 2)}`)
             return response
         } catch (error: unknown) {
-            console.error(
-                `Error during ${method.toUpperCase()} request to ${uri}: ${error instanceof Error ? error.message : error}`
+            log(
+                LogType.ERROR, `Error during ${method.toUpperCase()} request to ${uri}: ${error instanceof Error ? error.message : error}`
             )
             throw error
         }

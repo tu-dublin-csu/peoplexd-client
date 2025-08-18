@@ -7,10 +7,7 @@
 
     // Features to add to the dev container. More info: https://containers.dev/features.
     "features": {
-        "ghcr.io/devcontainers/features/github-cli:1": {},
-        "ghcr.io/devcontainers/features/node:1": {
-            "version": "22"
-        }
+        "ghcr.io/devcontainers/features/github-cli:1": {}
     },
     "customizations": {
         "vscode": {
@@ -18,7 +15,8 @@
                 "dbaeumer.vscode-eslint",
                 "esbenp.prettier-vscode",
                 "GitHub.vscode-pull-request-github",
-                "GitHub.vscode-github-actions"
+                "GitHub.vscode-github-actions",
+                "github.copilot"
             ],
             "settings": {
                 "terminal.integrated.defaultProfile.linux": "zsh",

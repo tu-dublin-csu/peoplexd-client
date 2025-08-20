@@ -1,10 +1,8 @@
 import { AxiosResponse, AxiosHeaders } from 'axios'
 import { PositionService } from '../src/PositionService'
 import { PeopleXdClient } from '../src/PeopleXdClient'
-import { decodeHtml } from '../src/Utilities'
 
 jest.mock('../src/PeopleXdClient')
-jest.mock('../src/Utilities')
 
 describe('PositionService', () => {
     let client: PeopleXdClient
@@ -95,16 +93,12 @@ describe('PositionService', () => {
 
             // Setup mocks
             ;(client.request as jest.Mock).mockResolvedValue(mockResponse)
-            ;(decodeHtml as jest.Mock).mockReturnValue(decodedTitle)
 
             // Call the method
             const result = await positionService.getFullJobTitle(positionCode)
 
             // Verify getPositionTitle was called
             expect(client.request).toHaveBeenCalledWith('GET', `v1/reference/type/POSTTL/${positionCode}`)
-
-            // Verify decodeHtml was called with the correct parameter
-            expect(decodeHtml).toHaveBeenCalledWith(encodedTitle)
 
             // Verify the result
             expect(result).toBe(decodedTitle)

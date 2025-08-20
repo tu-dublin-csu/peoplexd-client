@@ -1,6 +1,6 @@
 {
   "name": "peoplexd-client",
-  "version": "0.0.6-beta-stg",
+  "version": "0.0.7-beta-stg",
   "description": "A TypeScript application to interact with the PeopleXd API",
   "main": "./dist/index.cjs",
   "type": "module",

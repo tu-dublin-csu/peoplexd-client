@@ -1,4 +1,7 @@
 name: 'Test, Build and Deploy when push to main'
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
 on:
     push:
         branches:
@@ -21,8 +24,6 @@ jobs:
         needs: test
         runs-on: ubuntu-latest
         name: Build and Deploy project
-        env:
-            NODE_AUTH_TOKEN: ${{ secrets.PEOPLEXD_NPM_TOKEN }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -36,4 +37,8 @@ jobs:
             - name: Build Package
               run: npm run build
             - name: Publish Package
-              run: npm publish
+              if: github.event_name == 'push'
+              run: npm publish --provenance --access public
+            - name: Dry-run Publish (workflow_dispatch)
+              if: github.event_name == 'workflow_dispatch'
+              run: npm publish --provenance --access public --dry-run

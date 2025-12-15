@@ -5,7 +5,7 @@ console.log(process.env.PEOPLEXD_URL)
 try {
     const defaultOptions = {
         titleCodeSubstitutions: {
-            HPAL: 'AL'
+            CSUL: 'ALP'
         }
     }
     const client = await PeopleXdClient.new(
@@ -22,5 +22,7 @@ try {
 
     console.log(appointments)
 } catch (error) {
-    console.error('An error occurred:', error.data)
+    console.error('An error occurred:', {
+        message: error?.message,
+    })
 }

@@ -1,10 +1,8 @@
 import { AxiosResponse, AxiosHeaders } from 'axios'
 import { DepartmentService } from '../src/DepartmentService'
 import { PeopleXdClient } from '../src/PeopleXdClient'
-import { decodeHtml } from '../src/Utilities'
 
 jest.mock('../src/PeopleXdClient')
-jest.mock('../src/Utilities')
 
 describe('DepartmentService', () => {
     let client: PeopleXdClient
@@ -94,16 +92,12 @@ describe('DepartmentService', () => {
 
             // Setup mocks
             ;(client.request as jest.Mock).mockResolvedValue(mockResponse)
-            ;(decodeHtml as jest.Mock).mockReturnValue(decodedDescription)
 
             // Call the method
             const result = await departmentService.getFullDepartment(deptCode)
 
             // Verify getDepartment was called
             expect(client.request).toHaveBeenCalledWith('GET', `v1/reference/type/DEPT/${deptCode}`)
-
-            // Verify decodeHtml was called with the correct parameter
-            expect(decodeHtml).toHaveBeenCalledWith(encodedDescription)
 
             // Verify the result
             expect(result).toBe(decodedDescription)

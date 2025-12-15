@@ -1,4 +1,4 @@
-import { decodeHtml } from '../src/Utilities'
+import { decodeHtml, log, LogType } from '../src/Utilities'
 import { decode } from 'html-entities'
 
 // Mock the html-entities package
@@ -50,5 +50,69 @@ describe('Utilities', () => {
 
             expect(decode).toHaveBeenCalledWith(input)
         })
+    })
+    describe('log function', () => {
+        beforeEach(() => {
+            // Clear all mocks before each test
+            jest.clearAllMocks()
+            process.env.PXD_NODE_ENV = 'DEVELOPMENT' // Set environment variable for testing
+        })
+
+        afterEach(() => {
+            delete process.env.PXD_NODE_ENV // Clean up after tests
+        })
+
+        it('should log log messages in development environment', () => {
+            const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+
+            log(LogType.LOG, 'Test log message')
+
+            expect(consoleSpy).toHaveBeenCalledWith('Test log message')
+            consoleSpy.mockRestore()
+        });
+
+        it('should log warn messages in development environment', () => {
+            const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
+
+            log(LogType.WARN, 'Test warn message')
+
+            expect(consoleSpy).toHaveBeenCalledWith('Test warn message')
+            consoleSpy.mockRestore()
+        });
+
+        it('should log error messages in development environment', () => {
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+
+            log(LogType.ERROR, 'Test error message')
+
+            expect(consoleSpy).toHaveBeenCalledWith('Test error message')
+            consoleSpy.mockRestore()
+        });
+
+        it('should log debug messages in development environment', () => {
+            const consoleSpy = jest.spyOn(console, 'debug').mockImplementation()
+
+            log(LogType.DEBUG, 'Test debug message')
+
+            expect(consoleSpy).toHaveBeenCalledWith('Test debug message')
+            consoleSpy.mockRestore()
+        });
+
+        it('should not log messages if PXD_NODE_ENV is not set', () => {
+            delete process.env.PXD_NODE_ENV; // Remove the environment variable
+
+            const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+            log(LogType.LOG, 'This should not be logged');
+
+            expect(consoleSpy).not.toHaveBeenCalled();
+            consoleSpy.mockRestore();
+        });
+
+        it('should throw an error for unknown log types', () => {
+            expect(() => {
+                log('UNKNOWN' as LogType, 'This should throw an error');
+            }).toThrow('Unknown log type: UNKNOWN');
+        });
     })
 })

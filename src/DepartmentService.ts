@@ -10,7 +10,7 @@ export class DepartmentService {
     }
 
     public async getDepartment(deptCode: string): Promise<AxiosResponse> {
-        return await this.client.request('GET', `v1/reference/type/DEPT/${deptCode}`)
+        return await this.client.request('GET', `v1/reference/type/DEPT/${decodeHtml(deptCode)}`)
     }
 
     public async getFullDepartment(deptCode: string): Promise<string> {

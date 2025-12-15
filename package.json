@@ -1,6 +1,6 @@
 {
   "name": "peoplexd-client",
-  "version": "0.0.4-beta",
+  "version": "0.0.9-beta",
   "description": "A TypeScript application to interact with the PeopleXd API",
   "main": "./dist/index.cjs",
   "type": "module",
@@ -10,7 +10,7 @@
     "dist"
   ],
   "scripts": {
-    "start": "node src/_main-test-dist-folder.js",
+    "start": "node dummy_proj/main.js",
     "build": "tsup",
     "test": "jest",
     "format": "prettier --write .",

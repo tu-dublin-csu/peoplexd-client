@@ -1,4 +1,5 @@
 import { RawAppointment, ProcessedAppointment } from './AppointmentInterfaces'
+import { log, LogType } from './Utilities'
 export { ProcessedAppointment }
 
 export class AppointmentProcessorService {
@@ -19,7 +20,7 @@ export class AppointmentProcessorService {
         const mergedAppointments: ProcessedAppointment[] = []
         const currentAppointment = this.createProcessedAppointment(rawAppointments[0])
 
-        console.log('Processing appointments...')
+        log(LogType.LOG, 'Processing appointments...')
 
         this.mergeAppointments(rawAppointments, mergedAppointments, currentAppointment)
 
@@ -34,7 +35,7 @@ export class AppointmentProcessorService {
         for (let i = 1; i < rawAppointments.length; i++) {
             const nextAppointment = rawAppointments[i]
 
-            console.log(`Processing appointment ${i + 1} of ${rawAppointments.length}`)
+            log(LogType.LOG, `Processing appointment ${i + 1} of ${rawAppointments.length}`)
 
             if (this.shouldSkipAppointment(currentAppointment, nextAppointment)) {
                 continue
@@ -42,10 +43,10 @@ export class AppointmentProcessorService {
 
             const daysDifference = this.calculateDaysDifference(currentAppointment.endDate, nextAppointment.startDate)
 
-            console.log(`Days difference: ${daysDifference}`)
+            log(LogType.LOG, `Days difference: ${daysDifference}`)
 
             if (this.shouldMergeAppointments(currentAppointment, nextAppointment, daysDifference)) {
-                console.log('Merging appointments...')
+                log(LogType.LOG, 'Merging appointments...')
                 currentAppointment = this.mergeTwoAppointments(currentAppointment, nextAppointment)
             } else {
                 mergedAppointments.push(currentAppointment)
@@ -105,7 +106,7 @@ export class AppointmentProcessorService {
         nextAppointment: RawAppointment
     ): boolean {
         if (!currentAppointment.endDate || !nextAppointment.startDate) {
-            console.warn('Skipping appointment due to missing startDate or endDate')
+            log(LogType.WARN, 'Skipping appointment due to missing startDate or endDate')
             return true
         }
         return false

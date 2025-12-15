@@ -16,7 +16,9 @@ try {
     )
 
     console.log(client.getOptions())
-    const appointments = await client.cleanAppointments(process.env.TEST_STAFF_ID)
+
+    const staffIDFail = '123456'; // Example staff ID that might not exist
+    const appointments = await client.cleanAppointments(staffIDFail)
 
     console.log(appointments)
 } catch (error) {

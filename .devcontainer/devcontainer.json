@@ -18,7 +18,8 @@
                 "dbaeumer.vscode-eslint",
                 "esbenp.prettier-vscode",
                 "GitHub.vscode-pull-request-github",
-                "GitHub.vscode-github-actions"
+                "GitHub.vscode-github-actions",
+                "github.copilot"
             ],
             "settings": {
                 "terminal.integrated.defaultProfile.linux": "zsh",

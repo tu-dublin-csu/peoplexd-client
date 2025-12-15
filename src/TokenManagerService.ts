@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import axios from 'axios'
+import { log, LogType } from './Utilities'
 
 const TMP_DIR = 'tmp'
 const CACHE_TOKEN_FILE = 'cache_token'
@@ -55,9 +56,9 @@ export class TokenManagerService {
             this.pxdToken = cachedToken
         } catch (error: unknown) {
             if (error instanceof Error) {
-                console.log(`No cached token found or error reading cache: ${error.message}`)
+                log(LogType.LOG, `No cached token found or error reading cache: ${error.message}`)
             } else {
-                console.log(`No cached token found or error reading cache`)
+                log(LogType.LOG, `No cached token found or error reading cache`)
             }
             this.pxdToken = null
         }
@@ -74,9 +75,9 @@ export class TokenManagerService {
             fs.writeFileSync(path.join(TMP_DIR, CACHE_TOKEN_FILE), JSON.stringify(this.pxdToken))
         } catch (error: unknown) {
             if (error instanceof Error) {
-                console.error('Error caching token:', error.message)
+                log(LogType.ERROR, 'Error caching token:', error.message)
             } else {
-                console.error('Unknown error caching token:', error)
+                log(LogType.ERROR, 'Unknown error caching token:', error)
             }
         }
     }
@@ -114,9 +115,9 @@ export class TokenManagerService {
             this.cacheToken()
         } catch (error: unknown) {
             if (error instanceof Error) {
-                console.error('Error fetching token:', error.message)
+                log(LogType.ERROR, 'Error fetching token:', error.message)
             } else {
-                console.error('Unknown error fetching token:', error)
+                log(LogType.ERROR, 'Unknown error fetching token:', error)
             }
             throw error
         }

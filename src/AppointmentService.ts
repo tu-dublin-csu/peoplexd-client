@@ -17,12 +17,19 @@ export class AppointmentService {
     public async cleanAppointments(staffNumber: string): Promise<ProcessedAppointment[]> {
         const rawAppointments = await this.getAppointments(staffNumber)
         const processedAppointments: ProcessedAppointment[] = []
+        const departmentCache = new Map<string, string>()
+        const jobTitleCache = new Map<string, string>()
 
         const cleanedAppointments = AppointmentProcessorService.processAppointments(rawAppointments)
 
         for (const cleanedAppointment of cleanedAppointments) {
-            const fullDepartment = await this.client.getFullDepartment(cleanedAppointment.department)
-            const fullJobTitle = await this.client.getFullJobTitle(cleanedAppointment.jobTitle)
+            const fullDepartment = departmentCache.get(cleanedAppointment.department)
+                ?? (await this.client.getFullDepartment(cleanedAppointment.department))
+            departmentCache.set(cleanedAppointment.department, fullDepartment)
+
+            const fullJobTitle = jobTitleCache.get(cleanedAppointment.jobTitle)
+                ?? (await this.client.getFullJobTitle(cleanedAppointment.jobTitle))
+            jobTitleCache.set(cleanedAppointment.jobTitle, fullJobTitle)
 
             processedAppointments.push({
                 appointmentId: cleanedAppointment.appointmentId,

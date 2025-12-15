@@ -14,15 +14,17 @@ export class AppointmentProcessorService {
             return []
         }
 
-        // Sort appointments by startDate
-        rawAppointments.sort((a, b) => this.parseDate(a.startDate).getTime() - this.parseDate(b.startDate).getTime())
+        // Sort appointments by startDate without mutating the caller's array
+        const sortedAppointments = [...rawAppointments].sort(
+            (a, b) => this.parseDate(a.startDate).getTime() - this.parseDate(b.startDate).getTime()
+        )
 
         const mergedAppointments: ProcessedAppointment[] = []
-        const currentAppointment = this.createProcessedAppointment(rawAppointments[0])
+        const currentAppointment = this.createProcessedAppointment(sortedAppointments[0])
 
         log(LogType.LOG, 'Processing appointments...')
 
-        this.mergeAppointments(rawAppointments, mergedAppointments, currentAppointment)
+        this.mergeAppointments(sortedAppointments, mergedAppointments, currentAppointment)
 
         return mergedAppointments
     }

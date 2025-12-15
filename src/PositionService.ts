@@ -17,10 +17,13 @@ export class PositionService {
 
     public async getFullJobTitle(positionCode: string): Promise<string> {
         const response = await this.getPositionTitle(positionCode)
-        if(response?.data?.items[0]?.description){
-            return decodeHtml(response.data.items[0].description)
+        const description = response?.data?.items?.[0]?.description
+
+        if (description) {
+            return decodeHtml(description)
         }
-        log(LogType.ERROR, `No full job title found for position code: ${positionCode}`);
-        throw new Error(`No full job title found for position code: ${positionCode}`);
+
+        log(LogType.ERROR, `No full job title found for position code: ${positionCode}`)
+        throw new Error(`No full job title found for position code: ${positionCode}`)
     }
 }

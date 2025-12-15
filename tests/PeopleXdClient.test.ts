@@ -21,6 +21,7 @@ describe('PeopleXdClient', () => {
     let client: PeopleXdClient
     let httpClientMock: jest.Mocked<HttpClient>
     let positionServiceMock: jest.Mocked<PositionService>
+    let tokenManagerMock: { useOrFetchToken: jest.Mock; forceRefresh: jest.Mock }
     const defaultOptions: PeopleXdClientOptions = {
         titleCodeSubstitutions: {
             HPAL: 'AL',
@@ -30,7 +31,7 @@ describe('PeopleXdClient', () => {
 
     beforeEach(async () => {
         // Mock TokenManagerService.new and useOrFetchToken
-        const tokenManagerMock = {
+        tokenManagerMock = {
             useOrFetchToken: jest.fn().mockResolvedValue(token),
             forceRefresh: jest.fn()
         }
@@ -55,10 +56,10 @@ describe('PeopleXdClient', () => {
             expect(TokenManagerService.new).toHaveBeenCalledWith(url, clientId, clientSecret)
 
             // Verify the token was requested
-            expect(PeopleXdClient.tokenManager.useOrFetchToken).toHaveBeenCalled()
+            expect(tokenManagerMock.useOrFetchToken).toHaveBeenCalled()
 
             // Verify HttpClient was constructed with correct parameters
-            expect(HttpClient).toHaveBeenCalledWith(url, PeopleXdClient.tokenManager)
+            expect(HttpClient).toHaveBeenCalledWith(url, tokenManagerMock)
 
             // Verify services were initialized
             expect(AppointmentService).toHaveBeenCalledWith(client)

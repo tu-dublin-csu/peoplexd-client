@@ -58,6 +58,8 @@ const departmentName = await client.getFullDepartment('IT_DEPT')
 
 // Get position/job title information
 const jobTitle = await client.getFullJobTitle('SOFTWARE_DEV')
+
+// Titles/departments are fetched once per cleanAppointments call and reused for repeated codes
 ```
 
 ## API Documentation
@@ -93,9 +95,10 @@ interface ProcessedAppointment {
 
 This client handles OAuth authentication automatically. It will:
 
-- Cache tokens locally for reuse
-- Refresh tokens when they expire
-- Securely store credentials
+- Reuse tokens in memory per client instance until they expire (no disk persistence)
+- Refresh tokens when they expire and expose `forceRefresh` for callers that need to force a new token
+- Retry a 401 once for idempotent requests only, and retry idempotent requests once on transient 5xx/timeout with backoff
+- Securely store credentials in memory
 
 ## Development
 

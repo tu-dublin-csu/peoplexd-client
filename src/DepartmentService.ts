@@ -15,6 +15,12 @@ export class DepartmentService {
 
     public async getFullDepartment(deptCode: string): Promise<string> {
         const response = await this.getDepartment(deptCode)
-        return decodeHtml(response.data.items[0].description)
+        const description = response?.data?.items?.[0]?.description
+
+        if (!description) {
+            throw new Error(`No department found for code: ${deptCode}`)
+        }
+
+        return decodeHtml(description)
     }
 }

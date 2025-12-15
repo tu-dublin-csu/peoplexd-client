@@ -1,0 +1,99 @@
+name: 'CI, Build, and Publish'
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'staging'
+  pull_request:
+  workflow_dispatch:
+    
+jobs:
+  guard-main-from-staging:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    name: Enforce staging->main only
+    steps:
+      - name: Ensure main only accepts PRs from staging
+        if: github.base_ref == 'main' && github.head_ref != 'staging'
+        run: |
+          echo "ERROR: You can only merge to main from staging. All changes must go through staging." >&2
+          exit 1
+
+  test:
+      runs-on: ubuntu-latest
+      name: Test the application
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+          - name: Install Dependancies
+            run: npm install
+          - name: Test application
+            run: npm test
+          - name: Lint Code
+            run: npm run lint
+
+  build:
+      needs: test
+      runs-on: ubuntu-latest
+      name: Build the project
+      if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+          - name: Set up node
+            uses: actions/setup-node@v4
+            with:
+                node-version: '22'
+                registry-url: https://registry.npmjs.org
+          - name: Install Dependancies
+            run: npm install
+          - name: Build Package
+            run: npm run build
+
+  publish:
+      needs: build
+      runs-on: ubuntu-latest
+      name: Publish Package
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+          - name: Set up node
+            uses: actions/setup-node@v4
+            with:
+                node-version: '22'
+                registry-url: https://registry.npmjs.org
+          - name: Install Dependancies
+            run: npm install
+          - name: Publish
+            run: npm publish --provenance --access public
+
+  dry-run-publish:
+      needs: build
+      runs-on: ubuntu-latest
+      name: Dry-run Publish
+      if: github.event_name == 'workflow_dispatch'
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+          - name: Set up node
+            uses: actions/setup-node@v4
+            with:
+                node-version: '22'
+                registry-url: https://registry.npmjs.org
+          - name: Install Dependancies
+            run: npm install
+          - name: Dry-run Publish
+            run: npm publish --provenance --access public --dry-run
+          - name: Pack Artifact
+            run: npm pack
+          - name: Upload Package Artifact
+            uses: actions/upload-artifact@v4
+            with:
+                name: peoplexd-client-package
+                path: '*.tgz'

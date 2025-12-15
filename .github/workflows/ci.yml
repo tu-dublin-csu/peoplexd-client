@@ -72,8 +72,13 @@ jobs:
           - name: Install Dependancies
             run: npm install -g npm@latest
           - run: npm install
+<<<<<<< HEAD
+=======
+          - name: Build Package
+            run: npm run build
+>>>>>>> 9c83c7e (upgrade npm on publish)
           - name: Publish
-            run: npm publish --tag next --provenance --access public
+            run: npm publish --tag next --tag next --provenance --access public
 
   dry-run-publish:
       needs: build
@@ -91,6 +96,8 @@ jobs:
                 always-auth: true
           - name: Install Dependancies
             run: npm install
+          - name: Build Package
+            run: npm run build
           - name: Dry-run Publish
             run: npm publish --provenance --access public --dry-run
           - name: Pack Artifact

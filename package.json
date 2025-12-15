@@ -12,6 +12,7 @@
   "scripts": {
     "start": "node dummy_proj/main.js",
     "build": "tsup",
+    "prepublishOnly": "npm run build",
     "test": "jest",
     "format": "prettier --write .",
     "lint": "eslint . ",

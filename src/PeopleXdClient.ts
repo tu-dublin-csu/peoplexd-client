@@ -50,8 +50,8 @@ export class PeopleXdClient {
         options: PeopleXdClientOptions = {}
     ): Promise<PeopleXdClient> {
         this.tokenManager = await TokenManagerService.new(url, clientId, clientSecret)
-        const token = await this.tokenManager.useOrFetchToken()
-        const httpClient = new HttpClient(url, token)
+        await this.tokenManager.useOrFetchToken()
+        const httpClient = new HttpClient(url, this.tokenManager)
         return new PeopleXdClient(httpClient, options)
     }
 

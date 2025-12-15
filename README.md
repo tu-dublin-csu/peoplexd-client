@@ -93,7 +93,7 @@ interface ProcessedAppointment {
 
 This client handles OAuth authentication automatically. It will:
 
-- Cache tokens locally for reuse
+- Reuse tokens in memory until they expire
 - Refresh tokens when they expire
 - Securely store credentials
 

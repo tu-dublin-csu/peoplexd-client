@@ -30,9 +30,12 @@ describe('PeopleXdClient', () => {
 
     beforeEach(async () => {
         // Mock TokenManagerService.new and useOrFetchToken
-        ;(TokenManagerService.new as jest.Mock).mockResolvedValue({
-            useOrFetchToken: jest.fn().mockResolvedValue(token)
-        })
+        const tokenManagerMock = {
+            useOrFetchToken: jest.fn().mockResolvedValue(token),
+            forceRefresh: jest.fn()
+        }
+
+        ;(TokenManagerService.new as jest.Mock).mockResolvedValue(tokenManagerMock)
 
         // Create a new instance of PeopleXdClient with options
         client = await PeopleXdClient.new(url, clientId, clientSecret, defaultOptions)
@@ -55,7 +58,7 @@ describe('PeopleXdClient', () => {
             expect(PeopleXdClient.tokenManager.useOrFetchToken).toHaveBeenCalled()
 
             // Verify HttpClient was constructed with correct parameters
-            expect(HttpClient).toHaveBeenCalledWith(url, token)
+            expect(HttpClient).toHaveBeenCalledWith(url, PeopleXdClient.tokenManager)
 
             // Verify services were initialized
             expect(AppointmentService).toHaveBeenCalledWith(client)

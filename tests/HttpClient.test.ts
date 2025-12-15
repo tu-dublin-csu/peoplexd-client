@@ -1,6 +1,7 @@
 import axios from 'axios'
-import { AxiosHeaders, AxiosResponse } from 'axios'
+import { AxiosError, AxiosHeaders, AxiosResponse } from 'axios'
 import { HttpClient } from '../src/HttpClient'
+import { TokenManagerService } from '../src/TokenManagerService'
 
 // Mock axios
 jest.mock('axios')
@@ -9,11 +10,18 @@ const mockedAxios = axios as jest.MockedFunction<typeof axios>
 describe('HttpClient', () => {
     const baseUrl = 'https://api.example.com/'
     const token = 'test-auth-token'
+    const refreshedToken = 'refreshed-auth-token'
+    let tokenManager: jest.Mocked<TokenManagerService>
     let httpClient: HttpClient
 
     beforeEach(() => {
-        jest.clearAllMocks()
-        httpClient = new HttpClient(baseUrl, token)
+        jest.resetAllMocks()
+        tokenManager = {
+            useOrFetchToken: jest.fn().mockResolvedValue(token),
+            forceRefresh: jest.fn().mockResolvedValue(refreshedToken)
+        } as unknown as jest.Mocked<TokenManagerService>
+
+        httpClient = new HttpClient(baseUrl, tokenManager)
     })
 
     it('should make a GET request with correct parameters', async () => {
@@ -97,18 +105,62 @@ describe('HttpClient', () => {
         expect(response).toEqual(mockResponse)
     })
 
-    it('should handle errors when the request fails', async () => {
+    it('should retry once with a refreshed token on 401', async () => {
+        const endpoint = 'protected'
+        const mockResponse: AxiosResponse = {
+            data: { ok: true },
+            status: 200,
+            statusText: 'OK',
+            headers: new AxiosHeaders(),
+            config: { headers: new AxiosHeaders() }
+        }
+
+        const axios401Error = {
+            isAxiosError: true,
+            response: { status: 401 }
+        } as AxiosError
+
+        mockedAxios.mockRejectedValueOnce(axios401Error).mockResolvedValueOnce(mockResponse)
+
+        const response = await httpClient.request('GET', endpoint)
+
+        expect(tokenManager.useOrFetchToken).toHaveBeenCalledTimes(1)
+        expect(tokenManager.forceRefresh).toHaveBeenCalledTimes(1)
+
+        expect(axios).toHaveBeenNthCalledWith(1, {
+            method: 'GET',
+            url: `${baseUrl}${endpoint}`,
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            data: null
+        })
+
+        expect(axios).toHaveBeenNthCalledWith(2, {
+            method: 'GET',
+            url: `${baseUrl}${endpoint}`,
+            headers: {
+                Authorization: `Bearer ${refreshedToken}`,
+                'Content-Type': 'application/json'
+            },
+            data: null
+        })
+
+        expect(response).toEqual(mockResponse)
+    })
+
+    it('should surface non-401 errors without retry', async () => {
         const endpoint = 'invalid'
         const errorMessage = 'Network Error'
         const mockError = new Error(errorMessage)
 
-        // Mock axios to throw an error
         mockedAxios.mockRejectedValueOnce(mockError)
 
-        // Expect request to throw error
         await expect(httpClient.request('GET', endpoint)).rejects.toThrow(errorMessage)
 
-        // Check that axios was called with correct parameters
+        expect(tokenManager.forceRefresh).not.toHaveBeenCalled()
+
         expect(axios).toHaveBeenCalledWith({
             method: 'GET',
             url: `${baseUrl}${endpoint}`,

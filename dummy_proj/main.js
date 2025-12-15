@@ -17,7 +17,7 @@ try {
 
     console.log(client.getOptions())
 
-    const staffIDFail = '123456'; // Example staff ID that might not exist
+    const staffIDFail = '058279'; // Example staff ID that might not exist
     const appointments = await client.cleanAppointments(staffIDFail)
 
     console.log(appointments)

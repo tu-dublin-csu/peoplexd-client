@@ -28,14 +28,19 @@ export interface PeopleXdClientOptions {
  * PeopleXdClient class to interact with the PeopleXD API.
  */
 export class PeopleXdClient {
+    private tokenManager: TokenManagerService
     private httpClient: HttpClient
     private appointmentService: AppointmentService
     private departmentService: DepartmentService
     private positionService: PositionService
     private options: PeopleXdClientOptions
-    static tokenManager: TokenManagerService
 
-    private constructor(httpClient: HttpClient, options: PeopleXdClientOptions = {}) {
+    private constructor(
+        tokenManager: TokenManagerService,
+        httpClient: HttpClient,
+        options: PeopleXdClientOptions = {}
+    ) {
+        this.tokenManager = tokenManager
         this.httpClient = httpClient
         this.options = options
         this.appointmentService = new AppointmentService(this)
@@ -49,10 +54,10 @@ export class PeopleXdClient {
         clientSecret: string,
         options: PeopleXdClientOptions = {}
     ): Promise<PeopleXdClient> {
-        this.tokenManager = await TokenManagerService.new(url, clientId, clientSecret)
-        const token = await this.tokenManager.useOrFetchToken()
-        const httpClient = new HttpClient(url, token)
-        return new PeopleXdClient(httpClient, options)
+        const tokenManager = await TokenManagerService.new(url, clientId, clientSecret)
+        await tokenManager.useOrFetchToken()
+        const httpClient = new HttpClient(url, tokenManager)
+        return new PeopleXdClient(tokenManager, httpClient, options)
     }
 
     public async request(
@@ -82,5 +87,12 @@ export class PeopleXdClient {
      */
     public getOptions(): PeopleXdClientOptions {
         return this.options
+    }
+
+    /**
+     * Expose token manager for consumers that need direct control (e.g., retry policies) or testing.
+     */
+    public getTokenManager(): TokenManagerService {
+        return this.tokenManager
     }
 }

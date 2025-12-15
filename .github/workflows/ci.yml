@@ -68,6 +68,7 @@ jobs:
             with:
                 node-version: '22'
                 registry-url: https://registry.npmjs.org
+                always-auth: true
           - name: Install Dependancies
             run: npm install
           - name: Publish
@@ -86,6 +87,7 @@ jobs:
             with:
                 node-version: '22'
                 registry-url: https://registry.npmjs.org
+                always-auth: true
           - name: Install Dependancies
             run: npm install
           - name: Dry-run Publish

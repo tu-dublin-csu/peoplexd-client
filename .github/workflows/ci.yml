@@ -70,9 +70,10 @@ jobs:
                 registry-url: https://registry.npmjs.org
                 always-auth: true
           - name: Install Dependancies
-            run: npm install
+            run: npm install -g npm@latest
+          - run: npm install
           - name: Publish
-            run: npm publish --provenance --access public
+            run: npm publish --tag next --provenance --access public
 
   dry-run-publish:
       needs: build

@@ -56,5 +56,61 @@ describe('AppointmentProcessorService', () => {
             // Should not merge
             expect(result.length).toBe(2)
         })
+
+        it('should preserve primaryFlag when merging appointments where later appointment is primary', () => {
+            // First appointment is not primary, second is primary
+            const rawAppointments = [
+                createRawAppointment({
+                    appointmentId: 'APP1',
+                    primaryFlag: 'N',
+                    startDate: '20231121',
+                    endDate: '20241124',
+                    jobTitle: 'ASTLE',
+                    hierarchy: { structureCode: '2', company: '1', managementUnit: 'SH', department: 'SH06', costCentre: 'DL29', division: '1', location: '77', workGroup: 'SC02', user1: '', user2: '', user3: '', user4: '', user5: '' }
+                }),
+                createRawAppointment({
+                    appointmentId: 'APP2',
+                    primaryFlag: 'Y',
+                    startDate: '20241125',
+                    endDate: '20270831',
+                    jobTitle: 'ASTLE',
+                    hierarchy: { structureCode: '2', company: '1', managementUnit: 'SH', department: 'SH06', costCentre: 'DL29', division: '1', location: '77', workGroup: 'SC02', user1: '', user2: '', user3: '', user4: '', user5: '' }
+                })
+            ]
+
+            const result = AppointmentProcessorService.processAppointments(rawAppointments)
+
+            // Should merge into single appointment with primaryFlag true
+            expect(result.length).toBe(1)
+            expect(result[0].primaryFlag).toBe(true)
+        })
+
+        it('should preserve primaryFlag when merging appointments where earlier appointment is primary', () => {
+            // First appointment is primary, second is not
+            const rawAppointments = [
+                createRawAppointment({
+                    appointmentId: 'APP1',
+                    primaryFlag: 'Y',
+                    startDate: '20231121',
+                    endDate: '20241124',
+                    jobTitle: 'ASTLE',
+                    hierarchy: { structureCode: '2', company: '1', managementUnit: 'SH', department: 'SH06', costCentre: 'DL29', division: '1', location: '77', workGroup: 'SC02', user1: '', user2: '', user3: '', user4: '', user5: '' }
+                }),
+                createRawAppointment({
+                    appointmentId: 'APP2',
+                    primaryFlag: 'N',
+                    startDate: '20241125',
+                    endDate: '20270831',
+                    jobTitle: 'ASTLE',
+                    hierarchy: { structureCode: '2', company: '1', managementUnit: 'SH', department: 'SH06', costCentre: 'DL29', division: '1', location: '77', workGroup: 'SC02', user1: '', user2: '', user3: '', user4: '', user5: '' }
+                })
+            ]
+
+            const result = AppointmentProcessorService.processAppointments(rawAppointments)
+
+            // Should merge into single appointment with primaryFlag true
+            expect(result.length).toBe(1)
+            expect(result[0].primaryFlag).toBe(true)
+        })
     })
 })

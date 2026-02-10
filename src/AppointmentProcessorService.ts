@@ -119,6 +119,7 @@ export class AppointmentProcessorService {
         nextAppointment: RawAppointment
     ): ProcessedAppointment {
         currentAppointment.endDate = this.getLaterDate(currentAppointment.endDate, nextAppointment.endDate)
+        currentAppointment.primaryFlag = currentAppointment.primaryFlag || nextAppointment.primaryFlag === 'Y'
         return currentAppointment
     }
 }

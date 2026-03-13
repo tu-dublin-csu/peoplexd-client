@@ -5,7 +5,8 @@ console.log(process.env.PEOPLEXD_URL)
 try {
     const defaultOptions = {
         titleCodeSubstitutions: {
-            CSUL: 'ALP'
+            CSUL: 'ALP',
+            GL: 'AL'
         }
     }
     const client = await PeopleXdClient.new(
@@ -17,7 +18,7 @@ try {
 
     console.log(client.getOptions())
 
-    const staffIDFail = '058279'; // Example staff ID that might not exist
+    const staffIDFail = '602786'; // Example staff ID that might not exist
     const appointments = await client.cleanAppointments(staffIDFail)
 
     console.log(appointments)

@@ -20,7 +20,8 @@ export class AppointmentService {
         const departmentCache = new Map<string, string>()
         const jobTitleCache = new Map<string, string>()
 
-        const cleanedAppointments = AppointmentProcessorService.processAppointments(rawAppointments)
+        const titleCodeSubstitutions = this.client.getOptions().titleCodeSubstitutions ?? {}
+        const cleanedAppointments = AppointmentProcessorService.processAppointments(rawAppointments, titleCodeSubstitutions)
 
         for (const cleanedAppointment of cleanedAppointments) {
             const fullDepartment = departmentCache.get(cleanedAppointment.department)

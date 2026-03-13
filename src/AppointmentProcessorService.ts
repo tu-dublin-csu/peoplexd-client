@@ -9,7 +9,10 @@ export class AppointmentProcessorService {
      * @param rawAppointments - The raw appointment data.
      * @returns The processed appointment data.
      */
-    public static processAppointments(rawAppointments: RawAppointment[]): ProcessedAppointment[] {
+    public static processAppointments(
+        rawAppointments: RawAppointment[],
+        titleCodeSubstitutions: Record<string, string> = {}
+    ): ProcessedAppointment[] {
         if (!rawAppointments || rawAppointments.length === 0) {
             return []
         }
@@ -20,11 +23,11 @@ export class AppointmentProcessorService {
         )
 
         const mergedAppointments: ProcessedAppointment[] = []
-        const currentAppointment = this.createProcessedAppointment(sortedAppointments[0])
+        const currentAppointment = this.createProcessedAppointment(sortedAppointments[0], titleCodeSubstitutions)
 
         log(LogType.LOG, 'Processing appointments...')
 
-        this.mergeAppointments(sortedAppointments, mergedAppointments, currentAppointment)
+        this.mergeAppointments(sortedAppointments, mergedAppointments, currentAppointment, titleCodeSubstitutions)
 
         return mergedAppointments
     }
@@ -32,7 +35,8 @@ export class AppointmentProcessorService {
     private static mergeAppointments(
         rawAppointments: RawAppointment[],
         mergedAppointments: ProcessedAppointment[],
-        currentAppointment: ProcessedAppointment
+        currentAppointment: ProcessedAppointment,
+        titleCodeSubstitutions: Record<string, string> = {}
     ): void {
         for (let i = 1; i < rawAppointments.length; i++) {
             const nextAppointment = rawAppointments[i]
@@ -47,12 +51,12 @@ export class AppointmentProcessorService {
 
             log(LogType.LOG, `Days difference: ${daysDifference}`)
 
-            if (this.shouldMergeAppointments(currentAppointment, nextAppointment, daysDifference)) {
+            if (this.shouldMergeAppointments(currentAppointment, nextAppointment, daysDifference, titleCodeSubstitutions)) {
                 log(LogType.LOG, 'Merging appointments...')
                 currentAppointment = this.mergeTwoAppointments(currentAppointment, nextAppointment)
             } else {
                 mergedAppointments.push(currentAppointment)
-                currentAppointment = this.createProcessedAppointment(nextAppointment)
+                currentAppointment = this.createProcessedAppointment(nextAppointment, titleCodeSubstitutions)
             }
         }
 
@@ -75,21 +79,27 @@ export class AppointmentProcessorService {
     private static shouldMergeAppointments(
         currentAppointment: ProcessedAppointment,
         nextAppointment: RawAppointment,
-        daysDifference: number
+        daysDifference: number,
+        titleCodeSubstitutions: Record<string, string> = {}
     ): boolean {
+        const nextJobTitle = titleCodeSubstitutions[nextAppointment.jobTitle] ?? nextAppointment.jobTitle
         return (
-            currentAppointment.jobTitle === nextAppointment.jobTitle &&
+            currentAppointment.jobTitle === nextJobTitle &&
             currentAppointment.department === nextAppointment.hierarchy.department &&
             (daysDifference <= 90 || daysDifference < 0)
         ) // Merge if within 90 days or overlapping
     }
 
-    private static createProcessedAppointment(rawAppointment: RawAppointment): ProcessedAppointment {
+    private static createProcessedAppointment(
+        rawAppointment: RawAppointment,
+        titleCodeSubstitutions: Record<string, string> = {}
+    ): ProcessedAppointment {
+        const normalisedJobTitle = titleCodeSubstitutions[rawAppointment.jobTitle] ?? rawAppointment.jobTitle
         return {
             appointmentId: rawAppointment.appointmentId,
             primaryFlag: rawAppointment.primaryFlag === 'Y',
-            jobTitle: rawAppointment.jobTitle,
-            fullJobTitle: rawAppointment.jobTitle,
+            jobTitle: normalisedJobTitle,
+            fullJobTitle: normalisedJobTitle,
             department: rawAppointment.hierarchy.department,
             fullDepartment: rawAppointment.hierarchy.department,
             startDate: rawAppointment.startDate,

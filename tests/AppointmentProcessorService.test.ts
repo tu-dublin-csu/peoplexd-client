@@ -112,5 +112,57 @@ describe('AppointmentProcessorService', () => {
             expect(result.length).toBe(1)
             expect(result[0].primaryFlag).toBe(true)
         })
+
+        it('should merge contiguous appointments when titleCodeSubstitutions maps different codes to the same value', () => {
+            const rawAppointments = [
+                createRawAppointment({
+                    appointmentId: 'APP1',
+                    startDate: '20230101',
+                    endDate: '20230630',
+                    jobTitle: 'GL',
+                    hierarchy: { structureCode: '2', company: '1', managementUnit: 'SH', department: 'SH06', costCentre: 'DL29', division: '1', location: '77', workGroup: 'SC02', user1: '', user2: '', user3: '', user4: '', user5: '' }
+                }),
+                createRawAppointment({
+                    appointmentId: 'APP2',
+                    startDate: '20230701',
+                    endDate: '20231231',
+                    jobTitle: 'AL',
+                    hierarchy: { structureCode: '2', company: '1', managementUnit: 'SH', department: 'SH06', costCentre: 'DL29', division: '1', location: '77', workGroup: 'SC02', user1: '', user2: '', user3: '', user4: '', user5: '' }
+                })
+            ]
+
+            const substitutions = { GL: 'AL' }
+            const result = AppointmentProcessorService.processAppointments(rawAppointments, substitutions)
+
+            expect(result.length).toBe(1)
+            expect(result[0].jobTitle).toBe('AL')
+            expect(result[0].startDate).toBe('20230101')
+            expect(result[0].endDate).toBe('20231231')
+        })
+
+        it('should not merge contiguous appointments with different codes when no substitutions are provided', () => {
+            const rawAppointments = [
+                createRawAppointment({
+                    appointmentId: 'APP1',
+                    startDate: '20230101',
+                    endDate: '20230630',
+                    jobTitle: 'GL',
+                    hierarchy: { structureCode: '2', company: '1', managementUnit: 'SH', department: 'SH06', costCentre: 'DL29', division: '1', location: '77', workGroup: 'SC02', user1: '', user2: '', user3: '', user4: '', user5: '' }
+                }),
+                createRawAppointment({
+                    appointmentId: 'APP2',
+                    startDate: '20230701',
+                    endDate: '20231231',
+                    jobTitle: 'AL',
+                    hierarchy: { structureCode: '2', company: '1', managementUnit: 'SH', department: 'SH06', costCentre: 'DL29', division: '1', location: '77', workGroup: 'SC02', user1: '', user2: '', user3: '', user4: '', user5: '' }
+                })
+            ]
+
+            const result = AppointmentProcessorService.processAppointments(rawAppointments)
+
+            expect(result.length).toBe(2)
+            expect(result[0].jobTitle).toBe('GL')
+            expect(result[1].jobTitle).toBe('AL')
+        })
     })
 })

@@ -23,7 +23,8 @@ describe('AppointmentService', () => {
         client = {
             request: jest.fn(),
             getFullDepartment: jest.fn(),
-            getFullJobTitle: jest.fn()
+            getFullJobTitle: jest.fn(),
+            getOptions: jest.fn().mockReturnValue({})
         } as unknown as jest.Mocked<PeopleXdClient>
 
         // Create an instance of AppointmentService with the mock client
@@ -138,7 +139,7 @@ describe('AppointmentService', () => {
 
             // Verify method calls
             expect(appointmentService.getAppointments).toHaveBeenCalledWith(staffNumber)
-            expect(AppointmentProcessorService.processAppointments).toHaveBeenCalledWith(rawAppointments)
+            expect(AppointmentProcessorService.processAppointments).toHaveBeenCalledWith(rawAppointments, {})
             expect(client.getFullDepartment).toHaveBeenCalledWith('IT')
             expect(client.getFullJobTitle).toHaveBeenCalledWith('DEV')
 
@@ -199,7 +200,7 @@ describe('AppointmentService', () => {
 
             // Verify method calls
             expect(appointmentService.getAppointments).toHaveBeenCalledWith(staffNumber)
-            expect(AppointmentProcessorService.processAppointments).toHaveBeenCalledWith(rawAppointments)
+            expect(AppointmentProcessorService.processAppointments).toHaveBeenCalledWith(rawAppointments, {})
 
             // Verify result
             expect(result.length).toBe(2)

@@ -75,7 +75,7 @@ jobs:
           - name: Build Package
             run: npm run build
           - name: Publish
-            run: npm publish --tag next --tag next --provenance --access public
+            run: npm publish --tag next --provenance --access public
 
   dry-run-publish:
       needs: build

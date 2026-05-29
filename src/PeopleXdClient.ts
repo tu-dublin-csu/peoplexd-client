@@ -3,7 +3,11 @@ import { TokenManagerService } from './TokenManagerService'
 import { ProcessedAppointment } from './AppointmentInterfaces'
 import { HttpClient } from './HttpClient'
 import { AppointmentService } from './AppointmentService'
-import { DepartmentService } from './DepartmentService'
+import {
+    DepartmentService,
+    DepartmentReference,
+    ListDepartmentsOptions
+} from './DepartmentService'
 import { PositionService } from './PositionService'
 
 export enum HttpRequestMethod {
@@ -22,6 +26,15 @@ export interface PeopleXdClientOptions {
      * Example: { 'HPAL': 'AL' } would replace "Hourly Paid Assistant Lecturer" with "Assistant Lecturer"
      */
     titleCodeSubstitutions?: Record<string, string>
+
+    /**
+     * When true, `cleanAppointments` will not throw if an appointment references a
+     * department whose DEPT reference record is missing (HTTP 404 or empty `items`).
+     * Instead, `fullDepartment` falls back to the raw code and `fullDepartmentMissing`
+     * is set to true on the returned `ProcessedAppointment`. Transport errors are
+     * still propagated.
+     */
+    tolerateMissingReferenceData?: boolean
 }
 
 /**
@@ -70,6 +83,23 @@ export class PeopleXdClient {
 
     public async getFullDepartment(deptCode: string): Promise<string> {
         return await this.departmentService.getFullDepartment(deptCode)
+    }
+
+    /**
+     * Fetch a single DEPT reference record. Returns `null` for unknown codes
+     * (HTTP 404 or empty `items`); other errors propagate.
+     */
+    public async getDepartmentReference(deptCode: string): Promise<DepartmentReference | null> {
+        return await this.departmentService.getDepartmentReference(deptCode)
+    }
+
+    /**
+     * Async-iterate every DEPT reference record (paged).
+     */
+    public listDepartments(
+        options: ListDepartmentsOptions = {}
+    ): AsyncIterable<DepartmentReference> {
+        return this.departmentService.listDepartments(options)
     }
 
     public async getFullJobTitle(positionCode: string): Promise<string> {

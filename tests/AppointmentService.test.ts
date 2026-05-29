@@ -23,6 +23,7 @@ describe('AppointmentService', () => {
         client = {
             request: jest.fn(),
             getFullDepartment: jest.fn(),
+            getDepartmentReference: jest.fn(),
             getFullJobTitle: jest.fn(),
             getOptions: jest.fn().mockReturnValue({})
         } as unknown as jest.Mocked<PeopleXdClient>
@@ -223,6 +224,95 @@ describe('AppointmentService', () => {
             expect(result.length).toBe(0)
             expect(client.getFullDepartment).not.toHaveBeenCalled()
             expect(client.getFullJobTitle).not.toHaveBeenCalled()
+        })
+    })
+
+    describe('cleanAppointments tolerateMissingReferenceData', () => {
+        beforeEach(() => {
+            ;(client.getOptions as jest.Mock).mockReturnValue({ tolerateMissingReferenceData: true })
+        })
+
+        it('falls back to the raw code and flags fullDepartmentMissing when reference is null', async () => {
+            const rawAppointments: RawAppointment[] = [
+                createRawAppointment({
+                    appointmentId: 'APP1',
+                    jobTitle: 'DEV',
+                    hierarchy: createHierarchy({ department: 'DCRO' })
+                })
+            ]
+            const processedAppointments: ProcessedAppointment[] = [
+                createProcessedAppointment({
+                    appointmentId: 'APP1',
+                    jobTitle: 'DEV',
+                    department: 'DCRO'
+                })
+            ]
+
+            jest.spyOn(appointmentService, 'getAppointments').mockResolvedValue(rawAppointments)
+            ;(AppointmentProcessorService.processAppointments as jest.Mock).mockReturnValue(processedAppointments)
+            ;(client.getDepartmentReference as jest.Mock).mockResolvedValue(null)
+            client.getFullJobTitle.mockResolvedValue('Software Developer')
+
+            const result = await appointmentService.cleanAppointments(staffNumber)
+
+            expect(client.getDepartmentReference).toHaveBeenCalledWith('DCRO')
+            expect(client.getFullDepartment).not.toHaveBeenCalled()
+            expect(result[0].fullDepartment).toBe('DCRO')
+            expect(result[0].fullDepartmentMissing).toBe(true)
+        })
+
+        it('uses the reference description when present and does not set the missing flag', async () => {
+            const rawAppointments: RawAppointment[] = [
+                createRawAppointment({
+                    appointmentId: 'APP1',
+                    jobTitle: 'DEV',
+                    hierarchy: createHierarchy({ department: 'IT' })
+                })
+            ]
+            const processedAppointments: ProcessedAppointment[] = [
+                createProcessedAppointment({
+                    appointmentId: 'APP1',
+                    jobTitle: 'DEV',
+                    department: 'IT'
+                })
+            ]
+
+            jest.spyOn(appointmentService, 'getAppointments').mockResolvedValue(rawAppointments)
+            ;(AppointmentProcessorService.processAppointments as jest.Mock).mockReturnValue(processedAppointments)
+            ;(client.getDepartmentReference as jest.Mock).mockResolvedValue({
+                code: 'IT',
+                description: 'Information Technology Department',
+                active: 'Y'
+            })
+            client.getFullJobTitle.mockResolvedValue('Software Developer')
+
+            const result = await appointmentService.cleanAppointments(staffNumber)
+
+            expect(result[0].fullDepartment).toBe('Information Technology Department')
+            expect(result[0].fullDepartmentMissing).toBeUndefined()
+        })
+
+        it('still propagates non-404 errors from the reference lookup', async () => {
+            const rawAppointments: RawAppointment[] = [
+                createRawAppointment({
+                    appointmentId: 'APP1',
+                    jobTitle: 'DEV',
+                    hierarchy: createHierarchy({ department: 'IT' })
+                })
+            ]
+            const processedAppointments: ProcessedAppointment[] = [
+                createProcessedAppointment({
+                    appointmentId: 'APP1',
+                    jobTitle: 'DEV',
+                    department: 'IT'
+                })
+            ]
+
+            jest.spyOn(appointmentService, 'getAppointments').mockResolvedValue(rawAppointments)
+            ;(AppointmentProcessorService.processAppointments as jest.Mock).mockReturnValue(processedAppointments)
+            ;(client.getDepartmentReference as jest.Mock).mockRejectedValue(new Error('boom'))
+
+            await expect(appointmentService.cleanAppointments(staffNumber)).rejects.toThrow('boom')
         })
     })
 })

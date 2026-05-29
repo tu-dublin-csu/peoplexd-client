@@ -46,4 +46,11 @@ export interface ProcessedAppointment {
     fullDepartment: string
     startDate: string
     endDate: string
+    /**
+     * Present and `true` only when `cleanAppointments` is run with
+     * `tolerateMissingReferenceData: true` and the DEPT reference lookup
+     * returned no record for `department`. `fullDepartment` will then equal
+     * `department` (the raw code).
+     */
+    fullDepartmentMissing?: boolean
 }

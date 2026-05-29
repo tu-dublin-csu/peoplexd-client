@@ -116,6 +116,42 @@ describe('PeopleXdClient', () => {
         })
     })
 
+    describe('getDepartmentReference method', () => {
+        it('should delegate to departmentService.getDepartmentReference', async () => {
+            const deptCode = 'DCRO'
+            const reference = { code: 'DCRO', description: 'Office of the CRO', active: 'Y' as const }
+            const departmentServiceMock = (client as unknown as { departmentService: jest.Mocked<DepartmentService> })
+                .departmentService
+            departmentServiceMock.getDepartmentReference.mockResolvedValue(reference)
+
+            const result = await client.getDepartmentReference(deptCode)
+
+            expect(departmentServiceMock.getDepartmentReference).toHaveBeenCalledWith(deptCode)
+            expect(result).toBe(reference)
+        })
+    })
+
+    describe('listDepartments method', () => {
+        it('should delegate to departmentService.listDepartments and pass options through', async () => {
+            const departmentServiceMock = (client as unknown as { departmentService: jest.Mocked<DepartmentService> })
+                .departmentService
+
+            async function* fakeIterator() {
+                yield { code: 'A', description: 'Alpha', active: 'Y' as const }
+                yield { code: 'B', description: 'Beta', active: 'N' as const }
+            }
+            departmentServiceMock.listDepartments.mockReturnValue(fakeIterator())
+
+            const collected = []
+            for await (const item of client.listDepartments({ activeOnly: true, pageSize: 50 })) {
+                collected.push(item)
+            }
+
+            expect(departmentServiceMock.listDepartments).toHaveBeenCalledWith({ activeOnly: true, pageSize: 50 })
+            expect(collected).toHaveLength(2)
+        })
+    })
+
     describe('getFullJobTitle method', () => {
         it('should delegate to positionService.getFullJobTitle with original code when no substitution exists', async () => {
             const positionCode = 'P001'

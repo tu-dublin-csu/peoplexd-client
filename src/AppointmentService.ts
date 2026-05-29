@@ -17,33 +17,56 @@ export class AppointmentService {
     public async cleanAppointments(staffNumber: string): Promise<ProcessedAppointment[]> {
         const rawAppointments = await this.getAppointments(staffNumber)
         const processedAppointments: ProcessedAppointment[] = []
-        const departmentCache = new Map<string, string>()
+        const departmentCache = new Map<string, { fullDepartment: string; missing: boolean }>()
         const jobTitleCache = new Map<string, string>()
 
-        const titleCodeSubstitutions = this.client.getOptions().titleCodeSubstitutions ?? {}
+        const options = this.client.getOptions()
+        const tolerateMissing = options.tolerateMissingReferenceData === true
+        const titleCodeSubstitutions = options.titleCodeSubstitutions ?? {}
         const cleanedAppointments = AppointmentProcessorService.processAppointments(rawAppointments, titleCodeSubstitutions)
 
         for (const cleanedAppointment of cleanedAppointments) {
-            const fullDepartment = departmentCache.get(cleanedAppointment.department)
-                ?? (await this.client.getFullDepartment(cleanedAppointment.department))
-            departmentCache.set(cleanedAppointment.department, fullDepartment)
+            let deptEntry = departmentCache.get(cleanedAppointment.department)
+            if (!deptEntry) {
+                deptEntry = await this.resolveDepartment(cleanedAppointment.department, tolerateMissing)
+                departmentCache.set(cleanedAppointment.department, deptEntry)
+            }
 
             const fullJobTitle = jobTitleCache.get(cleanedAppointment.jobTitle)
                 ?? (await this.client.getFullJobTitle(cleanedAppointment.jobTitle))
             jobTitleCache.set(cleanedAppointment.jobTitle, fullJobTitle)
 
-            processedAppointments.push({
+            const appointment: ProcessedAppointment = {
                 appointmentId: cleanedAppointment.appointmentId,
                 primaryFlag: cleanedAppointment.primaryFlag,
                 jobTitle: cleanedAppointment.jobTitle,
                 fullJobTitle: fullJobTitle,
                 department: cleanedAppointment.department,
-                fullDepartment: fullDepartment,
+                fullDepartment: deptEntry.fullDepartment,
                 startDate: cleanedAppointment.startDate,
                 endDate: cleanedAppointment.endDate
-            })
+            }
+            if (deptEntry.missing) {
+                appointment.fullDepartmentMissing = true
+            }
+            processedAppointments.push(appointment)
         }
 
         return processedAppointments
+    }
+
+    private async resolveDepartment(
+        deptCode: string,
+        tolerateMissing: boolean
+    ): Promise<{ fullDepartment: string; missing: boolean }> {
+        if (!tolerateMissing) {
+            return { fullDepartment: await this.client.getFullDepartment(deptCode), missing: false }
+        }
+
+        const reference = await this.client.getDepartmentReference(deptCode)
+        if (reference) {
+            return { fullDepartment: reference.description, missing: false }
+        }
+        return { fullDepartment: deptCode, missing: true }
     }
 }

@@ -106,7 +106,7 @@ export class AppointmentProcessorService {
         if (typeof dateString !== 'string') {
             return null
         }
-        const match = /^(\d{4})(\d{2})(\d{2})/.exec(dateString.trim())
+        const match = /^(\d{4})(\d{2})(\d{2})$/.exec(dateString.trim())
         if (!match) {
             return null
         }

@@ -322,7 +322,9 @@ describe('AppointmentProcessorService', () => {
         it.each([
             ['missing', ''],
             ['non-numeric', 'notadate'],
-            ['impossible calendar', '20230230']
+            ['impossible calendar', '20230230'],
+            ['trailing-text', '20230101garbage'],
+            ['nine-digit', '202301011']
         ])('returns an appointment with a %s startDate unmerged without discarding valid appointments', (_label, badStart) => {
             const result = AppointmentProcessorService.processAppointments([
                 appt('BAD', badStart, '', 'Y'),
@@ -335,16 +337,20 @@ describe('AppointmentProcessorService', () => {
             expect(result[1]).toMatchObject({ startDate: badStart, primaryFlag: true })
         })
 
-        it('returns an appointment with a malformed (non-empty) endDate unmerged without discarding valid appointments', () => {
+        it.each([
+            ['non-numeric', '2023XX01'],
+            ['trailing-text', '20230315garbage'],
+            ['nine-digit', '202303151']
+        ])('returns an appointment with a %s endDate unmerged without discarding valid appointments', (_label, badEnd) => {
             const result = AppointmentProcessorService.processAppointments([
                 appt('A1', '20230101', '20230331'),
-                appt('BAD', '20230201', '2023XX01', 'Y'),
+                appt('BAD', '20230201', badEnd, 'Y'),
                 appt('A2', '20230401', '20230930')
             ])
 
             expect(result.map((a) => a.appointmentId)).toEqual(['A1', 'BAD'])
             expect(result[0]).toMatchObject({ startDate: '20230101', endDate: '20230930' })
-            expect(result[1]).toMatchObject({ endDate: '2023XX01', primaryFlag: true })
+            expect(result[1]).toMatchObject({ endDate: badEnd, primaryFlag: true })
         })
     })
 })

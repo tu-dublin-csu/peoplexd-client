@@ -1,5 +1,10 @@
 import { AppointmentProcessorService } from '../src/AppointmentProcessorService'
-import { createRawAppointment, createMergeableAppointmentPair } from './fixtures/AppointmentFixturesFactory'
+import { RawAppointment } from '../src/AppointmentInterfaces'
+import {
+    createRawAppointment,
+    createMergeableAppointmentPair,
+    createHierarchy
+} from './fixtures/AppointmentFixturesFactory'
 
 describe('AppointmentProcessorService', () => {
     describe('processAppointments', () => {
@@ -163,6 +168,183 @@ describe('AppointmentProcessorService', () => {
             expect(result.length).toBe(2)
             expect(result[0].jobTitle).toBe('GL')
             expect(result[1].jobTitle).toBe('AL')
+        })
+    })
+
+    describe('processAppointments with open-ended and malformed dates', () => {
+        // Synthetic fixtures only: department/title codes and dates are illustrative.
+        const appt = (
+            appointmentId: string,
+            startDate: string,
+            endDate: string,
+            primaryFlag: 'Y' | 'N' = 'N',
+            jobTitle = 'TITLE_A',
+            department = 'DEPT_A'
+        ): RawAppointment =>
+            createRawAppointment({
+                appointmentId,
+                startDate,
+                endDate,
+                primaryFlag,
+                jobTitle,
+                hierarchy: createHierarchy({ department })
+            })
+
+        const withoutId = (appointments: ReturnType<typeof AppointmentProcessorService.processAppointments>) =>
+            appointments.map((appointment) => ({ ...appointment, appointmentId: undefined }))
+
+        it('merges two open-ended appointments with the same start, department and title, keeping it open-ended and primary', () => {
+            const result = AppointmentProcessorService.processAppointments([
+                appt('A1', '20260105', '', 'N'),
+                appt('A2', '20260105', '', 'Y')
+            ])
+
+            expect(result).toHaveLength(1)
+            expect(result[0]).toMatchObject({ startDate: '20260105', endDate: '', primaryFlag: true })
+        })
+
+        it('produces an equivalent result when the open-ended pair is supplied in reverse order', () => {
+            const forward = AppointmentProcessorService.processAppointments([
+                appt('A1', '20260105', '', 'N'),
+                appt('A2', '20260105', '', 'Y')
+            ])
+            const reverse = AppointmentProcessorService.processAppointments([
+                appt('A2', '20260105', '', 'Y'),
+                appt('A1', '20260105', '', 'N')
+            ])
+
+            expect(withoutId(reverse)).toEqual(withoutId(forward))
+        })
+
+        it.each([
+            ['department', 'TITLE_A', 'DEPT_B'],
+            ['job title', 'TITLE_B', 'DEPT_A']
+        ])('retains open-ended appointments separately when the %s differs', (_label, jobTitle, department) => {
+            const result = AppointmentProcessorService.processAppointments([
+                appt('A1', '20260105', '', 'N'),
+                appt('A2', '20260105', '', 'Y', jobTitle, department)
+            ])
+
+            expect(result).toHaveLength(2)
+            expect(result.map((a) => [a.appointmentId, a.primaryFlag, a.endDate])).toEqual([
+                ['A1', false, ''],
+                ['A2', true, '']
+            ])
+        })
+
+        it('keeps later appointments after an open-ended appointment in another department', () => {
+            const result = AppointmentProcessorService.processAppointments([
+                appt('A1', '20200101', '', 'N', 'TITLE_A', 'DEPT_A'),
+                appt('A2', '20210101', '20211231', 'Y', 'TITLE_A', 'DEPT_B'),
+                appt('A3', '20220101', '', 'N', 'TITLE_B', 'DEPT_A')
+            ])
+
+            expect(result.map((a) => a.appointmentId)).toEqual(['A1', 'A2', 'A3'])
+        })
+
+        it.each([
+            ['finite first', [appt('F', '20230101', '20231231', 'N'), appt('O', '20230601', '', 'Y')]],
+            ['open-ended first', [appt('O', '20230601', '', 'Y'), appt('F', '20230101', '20231231', 'N')]]
+        ])('merges an overlapping finite and later open-ended appointment (%s in input)', (_label, input) => {
+            const result = AppointmentProcessorService.processAppointments(input)
+
+            expect(result).toHaveLength(1)
+            expect(result[0]).toMatchObject({ startDate: '20230101', endDate: '', primaryFlag: true })
+        })
+
+        it.each([
+            ['open-ended first', [appt('O', '20230101', '', 'N'), appt('F', '20230601', '20231231', 'Y')]],
+            ['finite first', [appt('F', '20230601', '20231231', 'Y'), appt('O', '20230101', '', 'N')]]
+        ])('keeps an open-ended appointment open when a later finite appointment is merged into it (%s in input)', (_label, input) => {
+            const result = AppointmentProcessorService.processAppointments(input)
+
+            expect(result).toHaveLength(1)
+            expect(result[0]).toMatchObject({ startDate: '20230101', endDate: '', primaryFlag: true })
+        })
+
+        it('merges an open-ended appointment that starts within 90 days of a finite one, and not at 91 days', () => {
+            const within = AppointmentProcessorService.processAppointments([
+                appt('F', '20230101', '20230331'),
+                appt('O', '20230629', '')
+            ])
+            const beyond = AppointmentProcessorService.processAppointments([
+                appt('F', '20230101', '20230331'),
+                appt('O', '20230630', '')
+            ])
+
+            expect(within).toHaveLength(1)
+            expect(within[0].endDate).toBe('')
+            expect(beyond).toHaveLength(2)
+        })
+
+        it('keeps finite overlap and the 90/91-day boundaries unchanged', () => {
+            const overlapping = AppointmentProcessorService.processAppointments([
+                appt('A1', '20230101', '20230630'),
+                appt('A2', '20230301', '20230531')
+            ])
+            expect(overlapping).toHaveLength(1)
+            expect(overlapping[0]).toMatchObject({ startDate: '20230101', endDate: '20230630' })
+
+            const ninety = AppointmentProcessorService.processAppointments([
+                appt('A1', '20230101', '20230331'),
+                appt('A2', '20230629', '20230930')
+            ])
+            expect(ninety).toHaveLength(1)
+            expect(ninety[0].endDate).toBe('20230930')
+
+            const ninetyOne = AppointmentProcessorService.processAppointments([
+                appt('A1', '20230101', '20230331'),
+                appt('A2', '20230630', '20230930')
+            ])
+            expect(ninetyOne).toHaveLength(2)
+        })
+
+        it('applies the 90-day boundary in whole calendar days across a daylight-saving change', () => {
+            // 20251001 -> 20251230 is exactly 90 days and spans the October clock change in Europe/Dublin
+            const result = AppointmentProcessorService.processAppointments([
+                appt('A1', '20250101', '20251001'),
+                appt('A2', '20251230', '20260331')
+            ])
+            expect(result).toHaveLength(1)
+        })
+
+        it('uses title-code substitutions when deciding whether open-ended appointments merge', () => {
+            const input = [appt('A1', '20240101', '', 'N', 'CODE_X'), appt('A2', '20240301', '', 'Y', 'CODE_Y')]
+
+            const substituted = AppointmentProcessorService.processAppointments(input, { CODE_X: 'CODE_Y' })
+            expect(substituted).toHaveLength(1)
+            expect(substituted[0]).toMatchObject({ jobTitle: 'CODE_Y', endDate: '', primaryFlag: true })
+
+            const unsubstituted = AppointmentProcessorService.processAppointments(input)
+            expect(unsubstituted.map((a) => a.jobTitle)).toEqual(['CODE_X', 'CODE_Y'])
+        })
+
+        it.each([
+            ['missing', ''],
+            ['non-numeric', 'notadate'],
+            ['impossible calendar', '20230230']
+        ])('returns an appointment with a %s startDate unmerged without discarding valid appointments', (_label, badStart) => {
+            const result = AppointmentProcessorService.processAppointments([
+                appt('BAD', badStart, '', 'Y'),
+                appt('A1', '20230101', '20230331'),
+                appt('A2', '20230401', '')
+            ])
+
+            expect(result.map((a) => a.appointmentId)).toEqual(['A1', 'BAD'])
+            expect(result[0]).toMatchObject({ startDate: '20230101', endDate: '', primaryFlag: false })
+            expect(result[1]).toMatchObject({ startDate: badStart, primaryFlag: true })
+        })
+
+        it('returns an appointment with a malformed (non-empty) endDate unmerged without discarding valid appointments', () => {
+            const result = AppointmentProcessorService.processAppointments([
+                appt('A1', '20230101', '20230331'),
+                appt('BAD', '20230201', '2023XX01', 'Y'),
+                appt('A2', '20230401', '20230930')
+            ])
+
+            expect(result.map((a) => a.appointmentId)).toEqual(['A1', 'BAD'])
+            expect(result[0]).toMatchObject({ startDate: '20230101', endDate: '20230930' })
+            expect(result[1]).toMatchObject({ endDate: '2023XX01', primaryFlag: true })
         })
     })
 })

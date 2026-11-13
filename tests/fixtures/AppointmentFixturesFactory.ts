@@ -128,6 +128,11 @@ export function createSequentialRawAppointments(
     return appointments
 }
 
+// Formats a local-time Date as YYYYMMDD (toISOString would shift the day in time zones ahead of UTC)
+function formatLocalDate(date: Date): string {
+    return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`
+}
+
 /**
  * Creates a pair of appointments for testing merging logic
  */
@@ -153,13 +158,13 @@ export function createMergeableAppointmentPair(shouldMerge: boolean = true, days
     const secondStartDate = new Date(firstEndDate)
     secondStartDate.setDate(secondStartDate.getDate() + daysBetween)
 
-    const formattedSecondStartDate = secondStartDate.toISOString().split('T')[0].replace(/-/g, '')
+    const formattedSecondStartDate = formatLocalDate(secondStartDate)
 
     // Calculate second appointment end date (3 months after start)
     const secondEndDate = new Date(secondStartDate)
     secondEndDate.setMonth(secondEndDate.getMonth() + 3)
 
-    const formattedSecondEndDate = secondEndDate.toISOString().split('T')[0].replace(/-/g, '')
+    const formattedSecondEndDate = formatLocalDate(secondEndDate)
 
     const secondAppointment = createRawAppointment({
         appointmentId: 'APP2',

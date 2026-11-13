@@ -91,6 +91,14 @@ interface ProcessedAppointment {
 }
 ```
 
+#### How `cleanAppointments` merges appointments
+
+- Dates are `YYYYMMDD`. An empty `endDate` means the appointment is ongoing (open-ended).
+- Appointments with the same department and job title are merged if they overlap or the gap between them is 90 days or less. Title-code substitutions are applied first. The gap is counted in whole calendar days.
+- A merged appointment keeps the earliest `startDate` and the earliest appointment's `appointmentId`. It takes the latest `endDate` and stays open-ended if any part of it is open-ended. It is primary if any part of it is primary.
+- Appointments with a different department or job title are never merged.
+- An appointment with a missing or invalid `startDate`, or a non-empty invalid `endDate`, is not merged. It is returned unchanged after the other appointments rather than dropped.
+
 ## Authentication
 
 This client handles OAuth authentication automatically. It will:
